@@ -22,7 +22,7 @@ namespace ISSISA
         {
             InitializeComponent();
 
-            filesSelectedBinding.DataSource = files.fileNames;
+            filesSelectedBinding.DataSource = files.files;
             files_selected_list.DataSource = filesSelectedBinding;
             files_selected_list.DisplayMember = "name";		//only takes 1 property
             files_selected_list.ValueMember = "name";
@@ -46,7 +46,7 @@ namespace ISSISA
                 {
                     files.add_file(x);
                 }
-                foreach(var s in files.fileNames)
+                foreach(var s in files.files)
                 {
                     Console.WriteLine(s.name);
                 }
@@ -126,6 +126,7 @@ namespace ISSISA
             if (files.files.Count >= 1 && files.fiscal_book_address != "No File Selected!")
             {
                 //run stuff
+                files.import_data();
             }
             else if (files.files.Count < 1)
             {
