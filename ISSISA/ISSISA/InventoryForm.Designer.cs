@@ -35,7 +35,6 @@
             this.remove_file_button = new System.Windows.Forms.Button();
             this.finished_files_list = new System.Windows.Forms.ListBox();
             this.save_files_button = new System.Windows.Forms.Button();
-            this.open_file_button = new System.Windows.Forms.Button();
             this.fiscal_book_button = new System.Windows.Forms.Button();
             this.remove_book_button = new System.Windows.Forms.Button();
             this.fiscal_book_label = new System.Windows.Forms.Label();
@@ -108,16 +107,6 @@
             this.save_files_button.Text = "Save File(s)";
             this.save_files_button.UseVisualStyleBackColor = true;
             // 
-            // open_file_button
-            // 
-            this.open_file_button.Location = new System.Drawing.Point(93, 495);
-            this.open_file_button.Name = "open_file_button";
-            this.open_file_button.Size = new System.Drawing.Size(87, 23);
-            this.open_file_button.TabIndex = 7;
-            this.open_file_button.Text = "Open File";
-            this.open_file_button.UseVisualStyleBackColor = true;
-            this.open_file_button.Click += new System.EventHandler(this.open_file_button_Click);
-            // 
             // fiscal_book_button
             // 
             this.fiscal_book_button.Location = new System.Drawing.Point(282, 495);
@@ -177,7 +166,6 @@
             this.Controls.Add(this.fiscal_book_label);
             this.Controls.Add(this.remove_book_button);
             this.Controls.Add(this.fiscal_book_button);
-            this.Controls.Add(this.open_file_button);
             this.Controls.Add(this.save_files_button);
             this.Controls.Add(this.finished_files_list);
             this.Controls.Add(this.remove_file_button);
@@ -202,7 +190,6 @@
         private System.Windows.Forms.Button remove_file_button;
         private System.Windows.Forms.ListBox finished_files_list;
         private System.Windows.Forms.Button save_files_button;
-        private System.Windows.Forms.Button open_file_button;
         private System.Windows.Forms.Button fiscal_book_button;
         private System.Windows.Forms.Button remove_book_button;
         private System.Windows.Forms.Label fiscal_book_label;

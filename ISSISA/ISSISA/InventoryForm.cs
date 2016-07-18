@@ -69,25 +69,7 @@ namespace ISSISA
             }
         }
 
-        private void open_file_button_Click(object sender, EventArgs e)
-        {
-            if (files_selected_list.SelectedItem != null)
-            {
-                fileNaming x = ((fileNaming)files_selected_list.SelectedItem);
-                try
-                {
-                    files.open_file(x);
-                }
-                catch(Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                }
-            }
-            else
-            {
-                MessageBox.Show("No File Selected");
-            }
-        }
+
 
         private void fiscal_book_button_Click(object sender, EventArgs e)
         {
@@ -126,6 +108,9 @@ namespace ISSISA
             if (files.files.Count >= 1 && files.fiscal_book_address != "No File Selected!")
             {
                 //run stuff
+                // at some point have it check to see if a specific serial exists rather than deleting lists. reimport handeling
+                files.imported_devices.Clear();
+                files.fb_assets.Clear();
                 files.import_data();
             }
             else if (files.files.Count < 1)
