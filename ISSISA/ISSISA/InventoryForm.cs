@@ -111,7 +111,14 @@ namespace ISSISA
                 // at some point have it check to see if a specific serial exists rather than deleting lists. reimport handeling
                 files.imported_devices.Clear();
                 files.fb_assets.Clear();
-                files.import_data();
+                try
+                {
+                    files.import_data();
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show("Don't have open the files selected! \n" + ex.Message);
+                }
             }
             else if (files.files.Count < 1)
             {
