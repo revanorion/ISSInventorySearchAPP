@@ -143,7 +143,7 @@
             this.files_header_label.Name = "files_header_label";
             this.files_header_label.Size = new System.Drawing.Size(212, 26);
             this.files_header_label.TabIndex = 11;
-            this.files_header_label.Text = "Select files to compare against Fiscal Book.\r\nDo not select fiscal book.";
+            this.files_header_label.Text = "Select files to compare against Fiscal Book.\r\nDo not add fiscal book here.";
             this.files_header_label.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // run_button
