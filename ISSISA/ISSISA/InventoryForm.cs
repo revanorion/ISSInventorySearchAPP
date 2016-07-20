@@ -57,10 +57,6 @@ namespace ISSISA
                 {
                     files.add_file(x);
                 }
-                foreach (var s in files.files)
-                {
-                    Console.WriteLine(s.name);
-                }
                 filesSelectedBinding.ResetBindings(false);
             }
 
