@@ -106,6 +106,7 @@
             this.save_files_button.TabIndex = 6;
             this.save_files_button.Text = "Save File(s)";
             this.save_files_button.UseVisualStyleBackColor = true;
+            this.save_files_button.Click += new System.EventHandler(this.save_files_button_Click);
             // 
             // fiscal_book_button
             // 

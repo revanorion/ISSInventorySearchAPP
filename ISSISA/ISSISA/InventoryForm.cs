@@ -14,9 +14,10 @@ namespace ISSISA
     public partial class InventoryForm : Form
     {
         OpenFileDialog ofd = new OpenFileDialog();
+        SaveFileDialog sfd = new SaveFileDialog();
         FileConnections files = new FileConnections();
         BindingSource filesSelectedBinding = new BindingSource();
-        
+        BindingSource finishedFilesBinding = new BindingSource();
 
         public InventoryForm()
         {
@@ -28,9 +29,19 @@ namespace ISSISA
             files_selected_list.ValueMember = "name";
 
             fiscal_book_label.Text = files.fiscal_book_address;
+
+
+            finishedFilesBinding.DataSource = files.finished_files;
+            finished_files_list.DataSource = finishedFilesBinding;
+            finished_files_list.DisplayMember = "name";		//only takes 1 property
+            finished_files_list.ValueMember = "name";
+
+
+
+
         }
 
-          private void InventoryForm_Load(object sender, EventArgs e)
+        private void InventoryForm_Load(object sender, EventArgs e)
         {
 
         }
@@ -42,11 +53,11 @@ namespace ISSISA
             ofd.Multiselect = true;
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                foreach(string x in ofd.FileNames)
+                foreach (string x in ofd.FileNames)
                 {
                     files.add_file(x);
                 }
-                foreach(var s in files.files)
+                foreach (var s in files.files)
                 {
                     Console.WriteLine(s.name);
                 }
@@ -57,7 +68,7 @@ namespace ISSISA
 
         private void remove_file_button_Click(object sender, EventArgs e)
         {
-            if(files_selected_list.SelectedItem != null)
+            if (files_selected_list.SelectedItem != null)
             {
                 fileNaming x = ((fileNaming)files_selected_list.SelectedItem);
                 files.remove_file(x);
@@ -92,7 +103,7 @@ namespace ISSISA
 
         private void remove_book_button_Click(object sender, EventArgs e)
         {
-            if(files.fiscal_book_address!=null)
+            if (files.fiscal_book_address != null)
             {
                 files.fiscal_book_address = null;
                 fiscal_book_label.Text = files.fiscal_book_address;
@@ -111,11 +122,13 @@ namespace ISSISA
                 // at some point have it check to see if a specific serial exists rather than deleting lists. reimport handeling
                 files.imported_devices.Clear();
                 files.fb_assets.Clear();
+                files.finished_files.Clear();
                 try
                 {
                     files.import_data();
+                    finishedFilesBinding.ResetBindings(false);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     MessageBox.Show("Don't have open the files selected! \n" + ex.Message);
                 }
@@ -131,6 +144,32 @@ namespace ISSISA
             else
             {
                 MessageBox.Show("Unhandled Exception!");
+            }
+        }
+
+        private void save_files_button_Click(object sender, EventArgs e)
+        {
+            sfd.Filter = "Excel Files (.xlsx)|*.xlsx|All Files (*.*)|*.*";
+            sfd.FilterIndex = 1;
+            if(files.found_devices!=null)
+            {
+                sfd.FileName = files.finished_files[0].name;
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+
+                    try
+                    {                        
+                        files.write_to_excel(sfd.FileName);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("No process ran or no devices found!");
             }
         }
     }
