@@ -13,9 +13,14 @@ namespace ISSISA
 {
     public partial class InventoryForm : Form
     {
+		//these are two dialog windows that will appear when user clicks on add or save buttons
         OpenFileDialog ofd = new OpenFileDialog();
         SaveFileDialog sfd = new SaveFileDialog();
+		
+		
         FileConnections files = new FileConnections();
+		
+		//these are binding sources that will show the file names of selected files
         BindingSource filesSelectedBinding = new BindingSource();
         BindingSource finishedFilesBinding = new BindingSource();
 
@@ -23,6 +28,7 @@ namespace ISSISA
         {
             InitializeComponent();
 
+			//binds the data source to the list
             filesSelectedBinding.DataSource = files.files;
             files_selected_list.DataSource = filesSelectedBinding;
             files_selected_list.DisplayMember = "name";		//only takes 1 property
@@ -30,7 +36,7 @@ namespace ISSISA
 
             fiscal_book_label.Text = files.fiscal_book_address;
 
-
+			//binds the data source to the list
             finishedFilesBinding.DataSource = files.finished_files;
             finished_files_list.DataSource = finishedFilesBinding;
             finished_files_list.DisplayMember = "name";		//only takes 1 property
@@ -46,6 +52,7 @@ namespace ISSISA
 
         }
 
+		//event handeler for add file button. dialog will appear for user to select files 
         private void add_file_button_Click(object sender, EventArgs e)
         {
             ofd.Filter = "CSV Files (.csv)|*.csv|Text Files (.txt)|*.txt|All Files (*.*)|*.*";
@@ -62,6 +69,7 @@ namespace ISSISA
 
         }
 
+		//event handeler for remove file button. will remove the selected file from the list
         private void remove_file_button_Click(object sender, EventArgs e)
         {
             if (files_selected_list.SelectedItem != null)
@@ -76,8 +84,7 @@ namespace ISSISA
             }
         }
 
-
-
+		//event handeler for fiscal book button. dialog will appear for user to select fiscal book 
         private void fiscal_book_button_Click(object sender, EventArgs e)
         {
             ofd.Filter = "Excel Files (.xlsx)|*.xlsx|All Files (*.*)|*.*";
@@ -97,6 +104,7 @@ namespace ISSISA
             }
         }
 
+		//event handeler for remove fiscal book button. will remove the selected fiscal book file
         private void remove_book_button_Click(object sender, EventArgs e)
         {
             if (files.fiscal_book_address != null)
@@ -110,12 +118,12 @@ namespace ISSISA
             }
         }
 
+		//event handeler for remove run button. will import all data from files list and fiscal book then compare the sets
         private void run_button_Click(object sender, EventArgs e)
         {
             if (files.files.Count >= 1 && files.fiscal_book_address != "No File Selected!")
             {
-                //run stuff
-                // at some point have it check to see if a specific serial exists rather than deleting lists. reimport handeling
+				//at some point have it check to see if a specific serial exists rather than deleting lists. reimport handeling
                 files.imported_devices.Clear();
                 files.fb_assets.Clear();
                 files.finished_files.Clear();
@@ -143,6 +151,7 @@ namespace ISSISA
             }
         }
 
+		//event handeler for save file button. will take the data from compared list and write it to an excel file
         private void save_files_button_Click(object sender, EventArgs e)
         {
             sfd.Filter = "Excel Files (.xlsx)|*.xlsx|All Files (*.*)|*.*";
