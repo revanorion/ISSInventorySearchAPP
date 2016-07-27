@@ -40,6 +40,7 @@
             this.fiscal_book_label = new System.Windows.Forms.Label();
             this.files_header_label = new System.Windows.Forms.Label();
             this.run_button = new System.Windows.Forms.Button();
+            this.finished_list_header = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // main_header_label
@@ -157,11 +158,22 @@
             this.run_button.UseVisualStyleBackColor = true;
             this.run_button.Click += new System.EventHandler(this.run_button_Click);
             // 
+            // finished_list_header
+            // 
+            this.finished_list_header.AutoSize = true;
+            this.finished_list_header.Location = new System.Drawing.Point(562, 131);
+            this.finished_list_header.Name = "finished_list_header";
+            this.finished_list_header.Size = new System.Drawing.Size(204, 26);
+            this.finished_list_header.TabIndex = 13;
+            this.finished_list_header.Text = "File will appear once run finishes.\r\nFile will open once save finises execution.";
+            this.finished_list_header.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // InventoryForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(796, 530);
+            this.Controls.Add(this.finished_list_header);
             this.Controls.Add(this.run_button);
             this.Controls.Add(this.files_header_label);
             this.Controls.Add(this.fiscal_book_label);
@@ -196,6 +208,7 @@
         private System.Windows.Forms.Label fiscal_book_label;
         private System.Windows.Forms.Label files_header_label;
         private System.Windows.Forms.Button run_button;
+        private System.Windows.Forms.Label finished_list_header;
     }
 }
 
