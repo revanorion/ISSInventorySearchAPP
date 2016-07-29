@@ -250,3 +250,4 @@ paket-files/
 # JetBrains Rider
 .idea/
 *.sln.iml
+/ISSISA/ISSISA_Library/ClassDiagram1.cd
