@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace ISSISA_Library
 {
     public class asset
     {
-		//Properties found in Fiscal Book
+        //Properties found in Fiscal Book
         public string asset_number { get; set; }
         public DateTime missing { get; set; }
         public double cost { get; set; }
@@ -29,8 +27,8 @@ namespace ISSISA_Library
         public string mac_address { get; set; }
         public string controller_name { get; set; }
         public bool found { get; set; }
-		
-		//Default constructor that sets up all the property fields.
+
+        //Default constructor that sets up all the property fields.
         public asset()
         {
             asset_number = "";
@@ -54,14 +52,14 @@ namespace ISSISA_Library
             controller_name = "";
             found = false;
         }
-		
-		//This constructor is used when getting data from an excel .xlsx fiscal book
+
+        //This constructor is used when getting data from an excel .xlsx fiscal book
         public asset(object asset_number, object missing, object iss_division, object description,
             object model, object asset_type, object location, object physical_location,
             object room_per_advantage, object room_per_fats, object cost, object last_inv,
             object serial_number, object fats_owner, object notes)
         {
-			//Make sure the object params are not null then convert them into specified data type
+            //Make sure the object params are not null then convert them into specified data type
             if (asset_number != Convert.DBNull)
                 this.asset_number = Convert.ToString(asset_number);
             if (missing != Convert.DBNull)
@@ -83,12 +81,12 @@ namespace ISSISA_Library
             if (room_per_fats != Convert.DBNull)
                 this.room_per_fats = Convert.ToString(room_per_fats);
             //Remove all characters for cost that would stop the process to convert to number
-			if (cost != Convert.DBNull)
+            if (cost != Convert.DBNull)
             {
-                cost = Convert.ToString(cost).Replace("$", "");
-                cost = Convert.ToString(cost).Replace(",", "");
-                cost = Convert.ToString(cost).Replace(" ", "");
-                this.cost = Convert.ToDouble(cost);
+                string myCost = cost.ToString();
+                myCost = Regex.Replace(myCost, @"[^\d+\.\d*]", "");
+                if (myCost != "")
+                    this.cost = Convert.ToDouble(myCost);
             }
             if (last_inv != Convert.DBNull && Convert.ToString(last_inv) != "#N/A")
                 this.last_inv = Convert.ToDateTime(last_inv);
@@ -102,7 +100,7 @@ namespace ISSISA_Library
 
         }
 
-		//for debugging only
+        //for debugging only
         public string output()
         {
 
