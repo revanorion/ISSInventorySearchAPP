@@ -77,6 +77,8 @@ namespace ISSISA
                 fileNaming x = ((fileNaming)files_selected_list.SelectedItem);
                 files.remove_file(x);
                 filesSelectedBinding.ResetBindings(false);
+                files.finished_files.Clear();
+                finishedFilesBinding.ResetBindings(false);
             }
             else
             {
@@ -111,6 +113,8 @@ namespace ISSISA
             {
                 files.fiscal_book_address = null;
                 fiscal_book_label.Text = files.fiscal_book_address;
+                files.finished_files.Clear();
+                finishedFilesBinding.ResetBindings(false);
             }
             else
             {
