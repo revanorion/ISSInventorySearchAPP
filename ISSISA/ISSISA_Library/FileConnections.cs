@@ -63,6 +63,7 @@ namespace ISSISA_Library
         //fb example: FY 2016 20160114
         //Sheet exists that must be called ISS Assets Inventory + year
         //calling funcitons: import_data
+
         public void open_fiscal_book()
         //public void open_fiscal_book_with_linqtoexcel()
         {
@@ -116,6 +117,7 @@ namespace ISSISA_Library
         }
 
 
+        //stupid and bloated, uses too much cpu and time
         public void open_fiscal_book_without_linqtoexcel()
         //public void open_fiscal_book()
         {
@@ -162,10 +164,10 @@ namespace ISSISA_Library
                     a.Cells[1, 14].Text,
                     a.Cells[1, 15].Text
                     );
+
                 fb_assets.Add(b);
             }
         }
-
 
 
         //this function takes a string that is a path to a file to be imported. 
