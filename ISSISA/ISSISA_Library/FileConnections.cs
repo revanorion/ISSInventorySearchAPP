@@ -1,20 +1,19 @@
-﻿using LinqToExcel;
-using Excel = Microsoft.Office.Interop.Excel;
+﻿using Excel = Microsoft.Office.Interop.Excel;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Office = Microsoft.Office.Core;
-
+using System.Data.OleDb;
+using System.Data;
 
 namespace ISSISA_Library
 {
     public class FileConnections
     {
+
         //This is used for exporting excel document
         public Excel.Application xlApp = new Excel.Application();
 
@@ -62,110 +61,65 @@ namespace ISSISA_Library
 
         //fb example: FY 2016 20160114
         //Sheet exists that must be called ISS Assets Inventory + year
-        //calling funcitons: import_data
-
+        //calling funcitons: import_data       
         public void open_fiscal_book()
-        //public void open_fiscal_book_with_linqtoexcel()
         {
             string year = fiscal_book_address.Substring(3, 4);
             string sheetName = "ISS Assets Inventory " + year;
-            //This is used to open the file
-            var excelFile = new ExcelQueryFactory(_fiscal_book_address.path);
-            int assetLocation = 0;
+            OleDbConnection con = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + _fiscal_book_address.path + ";Extended Properties=\"Excel 12.0 Xml;HDR=NO;IMEX=1;\"");
+            con.Open();
 
-            //selects all the rows in the asset sheet starting at the top
-            var AssetSheetRow = from a in excelFile.Worksheet(sheetName) select a;
-
-            //this loop is used to skip down to the starting point of our assets. 
-            foreach (var a in AssetSheetRow)
+            try
             {
-                string source = Convert.ToString(a["F1"].Value);
-                if (source != null && source.Equals("Asset #"))
+                //Create Dataset and fill with imformation from the Excel Spreadsheet for easier reference
+                DataSet myDataSet = new DataSet();
+                OleDbDataAdapter myCommand = new OleDbDataAdapter(" SELECT * from [" + sheetName + "$]", con);
+                bool ignore = true;
+                myCommand.Fill(myDataSet);
+                con.Close();
+
+                //Travers through each row in the dataset
+                foreach (DataRow myDataRow in myDataSet.Tables[0].Rows)
                 {
-                    assetLocation++;
-                    break;
+                    //Stores info in Datarow into an array
+                    Object[] cells = myDataRow.ItemArray;
+                    //Traverse through each array and put into object cellContent as type Object
+                    //Using Object as for some reason the Dataset reads some blank value which
+                    //causes a hissy fit when trying to read. By using object I can convert to
+                    //String at a later point.
+                    var result = cells.Where(n => n.ToString() == "Asset #").ToList();
+                    if (result.Count == 0 && ignore)
+                        continue;
+                    else if (ignore)
+                        ignore = false;
+                    else
+                    {
+                        asset b = new asset(cells[0],
+                            cells[1],
+                            cells[2],
+                            cells[3],
+                            cells[4],
+                            cells[5],
+                            cells[6],
+                            cells[7],
+                            cells[8],
+                            cells[9],
+                            cells[10],
+                            cells[11],
+                            cells[12],
+                            cells[13],
+                            cells[14]);
+                        fb_assets.Add(b);
+                    }
                 }
-                assetLocation++;
             }
-            //selects all the rows in the asset sheet starting at the location of the asset row
-            AssetSheetRow = (from a in excelFile.Worksheet(sheetName) select a).Skip(assetLocation);
-
-            //this loop selects each row in the list and grabs data from it.
-            foreach (var a in AssetSheetRow)
+            catch (Exception ex)
             {
-                //var a is a list of cells that can be accessed by referenced by the column's header
-                //columns that do not have a header begin with F
-                asset b = new asset(
-                    a["F1"].Value,
-                    a["F2"].Value,
-                    a["F3"].Value,
-                    a["F4"].Value,
-                    a["# Assets"].Value,
-                    a["Cost"].Value,
-                    a["F7"].Value,
-                    a["F8"].Value,
-                    a["F9"].Value,
-                    a["F10"].Value,
-                    a["F11"].Value,
-                    a["F12"].Value,
-                    a["F13"].Value,
-                    a["F14"].Value,
-                    a["F15"].Value
-                    );
-                fb_assets.Add(b);
+                throw new Exception();
             }
-        }
-
-
-        //stupid and bloated, uses too much cpu and time
-        public void open_fiscal_book_without_linqtoexcel()
-        //public void open_fiscal_book()
-        {
-            string year = fiscal_book_address.Substring(3, 4);
-            string sheetName = "ISS Assets Inventory " + year;
-            //This is used to open the file
-            if (xlApp == null)
+            finally
             {
-                Console.WriteLine("EXCEL could not be started. Check that your office installation and project references are correct.");
-                return;
-            }
-            xlApp.Visible = false;
-            Excel.Workbook wb = xlApp.Workbooks.Open(_fiscal_book_address.path);
-            Excel.Worksheet ws = (Excel.Worksheet)wb.Worksheets[1];
-
-            if (ws == null)
-            {
-                Console.WriteLine("Worksheet could not be created. Check that your office installation and project references are correct.");
-            }
-            int rows = 1, columns = 1;
-            bool skip = true;
-            Excel.Range currentFind = null;
-
-            //selects all the rows in the asset sheet starting at the top
-            currentFind = ws.Cells.Find(What: "Asset #", LookIn: Excel.XlFindLookIn.xlValues, LookAt: Excel.XlLookAt.xlPart);
-            currentFind = ws.Range[currentFind.Cells[1, 1], ws.Cells.SpecialCells(Excel.XlCellType.xlCellTypeLastCell, Type.Missing)];
-            foreach (Excel.Range a in currentFind.Rows)
-            {
-                if (skip) { skip = false; continue; }
-                asset b = new asset(
-                    a.Cells[1, 1].Text,
-                    a.Cells[1, 2].Text,
-                    a.Cells[1, 3].Text,
-                    a.Cells[1, 4].Text,
-                    a.Cells[1, 5].Text,
-                    a.Cells[1, 6].Text,
-                    a.Cells[1, 7].Text,
-                    a.Cells[1, 8].Text,
-                    a.Cells[1, 9].Text,
-                    a.Cells[1, 10].Text,
-                    a.Cells[1, 11].Text,
-                    a.Cells[1, 12].Text,
-                    a.Cells[1, 13].Text,
-                    a.Cells[1, 14].Text,
-                    a.Cells[1, 15].Text
-                    );
-
-                fb_assets.Add(b);
+                con.Close();
             }
         }
 
@@ -194,131 +148,75 @@ namespace ISSISA_Library
             files.RemoveAt(files.IndexOf(x));
         }
 
-        //this function handles the importing of data from tropos type csv files.
+
+        //this function handles the importing of data from supported type csv files.
         //calling funcitons: open_file
-        public void open_tropos(fileNaming x)
+        public void open_csv_file(fileNaming x, string skipUntil = null, string breakAt = null)
         {
-            var csvFile = new ExcelQueryFactory(x.path);
-            var AssetSheetRow = from a in csvFile.Worksheet(x.name) select a;
+            bool hasSkip = false, hasBreak = false, ignore = true;
+            char[] delimiters = new char[] { ',' };
 
-            //Tropos Column Names: InventorySerialNumber, InventoryIp, InventoryStatus, InventoryLocation, InventoryReason, Id
-            //this loop selects each row in the list and grabs data from it.
-            foreach (var col in AssetSheetRow)
+            if (skipUntil != null)
+                hasSkip = true;
+            if (breakAt != null)
+                hasBreak = true;
+            char csvType;
+            if (x.name.Contains("Tropos Export Data"))
+                csvType = 'T';
+            else if (x.name.Contains("Wireless_Controllers"))
+                csvType = 'W';
+            else if (x.name.Contains("aps_wireless"))
+                csvType = 'A';
+            else
+                throw new NotSupportedException();
+
+            using (StreamReader reader = new StreamReader(x.path))
             {
-                string serial = col["InventorySerialNumber"];
-                string status = col["InventoryStatus"];
-                string loc = col["InventoryLocation"];
-                asset myAsset = new asset();
-                myAsset.serial_number = serial;
-                myAsset.status = status;
-                myAsset.physical_location = loc;
-                imported_devices.Add(myAsset);
-            }
-        }
-
-        //this function handles the importing of data from aps_wireless type csv files.
-        //calling funcitons: open_file
-        public void open_aps_wireless(fileNaming x)
-        {
-            var csvFile = new ExcelQueryFactory(x.path);
-            int start = 0;
-            var AssetSheetRow = from a in csvFile.Worksheet(x.name) select a;
-
-            //this loop is used to skip down to the starting point of our assets. 
-            foreach (var a in AssetSheetRow)
-            {
-                string source = Convert.ToString(a["aps wireless with serial number"].Value);
-                if (source != null && source.Equals("AP Name"))
+                while (true)
                 {
-                    start++;
-                    break;
-                }
-                start++;
-            }
-
-            //selects all the rows in the asset sheet starting at the location of the asset row
-            var allRows = csvFile.WorksheetNoHeader().Skip(++start);
-            //this loop selects each row in the list and grabs data from it.
-            foreach (var row in allRows)
-            {
-                //this list holds the values of a single row
-                List<string> values = new List<string>();
-                //this loop selects each column in the row and adds it to a list.
-                foreach (var col in row)
-                {
-                    string source = Convert.ToString(col.Value);
-                    //if a value is equal to this string, all necessary data has already been captured and
-                    //function can terminate
-                    if (source != null && source.Equals("Disassociated AP(s)"))
-                    {
-                        //could possibly use return;
+                    string line = reader.ReadLine();
+                    if (line == null)
                         break;
+                    List<string> parts = line.Split(delimiters, StringSplitOptions.None).ToList();
+                    if (hasSkip && ignore && parts.Where(n => n.ToString() == skipUntil).ToList().Count() == 0)
+                        continue;
+                    else if (hasBreak && parts.Where(n => n.ToString() == breakAt).ToList().Count() > 0)
+                        break;
+                    else if (ignore)
+                        ignore = false;
+                    else
+                    {
+                        asset a = new asset();
+                        switch (csvType)
+                        {
+                            case 'T':
+                                a.serial_number = parts.ElementAt(0);
+                                a.status = parts.ElementAt(2);
+                                a.physical_location = parts.ElementAt(3);
+                                break;
+                            case 'W':
+                                a.controller_name = parts.ElementAt(0);
+                                a.physical_location = parts.ElementAt(2);
+                                a.serial_number = parts.ElementAt(4);
+                                a.model = parts.ElementAt(5);
+                                break;
+                            case 'A':
+                                a.device_name = parts.ElementAt(0);
+                                a.mac_address = parts.ElementAt(1);
+                                a.serial_number = parts.ElementAt(3);
+                                a.model = parts.ElementAt(4);
+                                a.physical_location = parts.ElementAt(5);
+                                a.controller_name = parts.ElementAt(6);
+                                break;
+                        }
+                        imported_devices.Add(a);
                     }
-                    values.Add(Convert.ToString(col.Value));
                 }
-                //if no data was selected terminate the loop and function ends.
-                if (values.Count == 0)
-                {
-                    break;
-                }
-                string div_name = values[0];
-                string mac = values[1];
-                string serial = values[3];
-                string model = values[4];
-                string loc = values[5];
-                string con_name = values[6];
-                values.Clear();
+                reader.Close();
 
-                asset myAsset = new asset();
-                myAsset.device_name = div_name;
-                myAsset.mac_address = mac;
-                myAsset.serial_number = serial;
-                myAsset.model = model;
-                myAsset.physical_location = loc;
-                myAsset.controller_name = con_name;
-                imported_devices.Add(myAsset);
             }
         }
 
-        //this function handles the importing of data from wireless_controllers type csv files.
-        //calling funcitons: open_file
-        public void open_wireless_controllers(fileNaming x)
-        {
-            var csvFile = new ExcelQueryFactory(x.path);
-            int serialLocation = 0;
-            var AssetSheetRow = from a in csvFile.Worksheet(x.name) select a;
-
-            //this loop is used to skip down to the starting point of our assets. 
-            foreach (var a in AssetSheetRow)
-            {
-                string source = Convert.ToString(a["Wireless Controllers"].Value);
-                if (source != null && source.Equals("Controller Name"))
-                {
-                    serialLocation++;
-                    break;
-                }
-                serialLocation++;
-            }
-
-            //selects all the rows in the asset sheet starting at the location of the asset row
-            AssetSheetRow = (from a in csvFile.Worksheet(x.name) select a).Skip(serialLocation);
-
-            //Wireless names: Wireless Controllers, F2-6
-            //this loop selects each row in the list and grabs data from it.
-            foreach (var col in AssetSheetRow)
-            {
-                string con_name = col["Wireless Controllers"];
-                string loc = col["F3"];
-                string serial = col["F5"];
-                string model = col["F6"];
-                asset myAsset = new asset();
-                myAsset.serial_number = serial;
-                myAsset.model = model;
-                myAsset.controller_name = con_name;
-                myAsset.physical_location = loc;
-                imported_devices.Add(myAsset);
-            }
-        }
 
         //this function handles the type of file to be opened.
         //this is based both of file extension as well if the file contains the specified name
@@ -331,19 +229,11 @@ namespace ISSISA_Library
                     break;
                 case ".csv":
                     if (x.name.Contains("Tropos"))
-                    {
-                        open_tropos(x);
-                    }
+                        open_csv_file(x, "InventorySerialNumber");
                     else if (x.name.Contains("aps_wireless"))
-                    {
-                        open_aps_wireless(x);
-
-                    }
+                        open_csv_file(x, "AP Name", "Disassociated AP(s)");
                     else if (x.name.Contains("Wireless_Controllers"))
-                    {
-
-                        open_wireless_controllers(x);
-                    }
+                        open_csv_file(x, "Controller Name");
                     break;
                 case ".txt":
                     open_text_dump(x);
@@ -409,6 +299,7 @@ namespace ISSISA_Library
                         }
                     }
                 }
+                sr.Close();
             }
         }
 
@@ -480,8 +371,10 @@ namespace ISSISA_Library
             }
 
             //save the file using the param as the path and name
+            ws.Columns.AutoFit();
             wb.SaveAs(x);
             //open the saved file
+
             open_excel_file(x);
         }
 
@@ -582,7 +475,8 @@ namespace ISSISA_Library
                 return;
             }
             xlApp.Visible = true;
-            xlApp.Workbooks.Open(x);
+            Excel.Workbooks openwb = xlApp.Workbooks;
+            openwb.Open(x);
         }
 
     }
