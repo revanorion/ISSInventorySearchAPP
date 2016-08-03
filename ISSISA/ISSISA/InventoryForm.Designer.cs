@@ -41,6 +41,8 @@
             this.files_header_label = new System.Windows.Forms.Label();
             this.run_button = new System.Windows.Forms.Button();
             this.finished_list_header = new System.Windows.Forms.Label();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // main_header_label
@@ -66,9 +68,11 @@
             // files_selected_list
             // 
             this.files_selected_list.FormattingEnabled = true;
+            this.files_selected_list.HorizontalScrollbar = true;
             this.files_selected_list.Location = new System.Drawing.Point(12, 160);
             this.files_selected_list.Name = "files_selected_list";
             this.files_selected_list.Size = new System.Drawing.Size(249, 329);
+            this.files_selected_list.Sorted = true;
             this.files_selected_list.TabIndex = 2;
             // 
             // add_file_button
@@ -168,11 +172,22 @@
             this.finished_list_header.Text = "File will appear once run finishes.\r\nFile will open once save finises execution.";
             this.finished_list_header.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = global::ISSISA.Properties.Resources.ISS_logo3;
+            this.pictureBox1.Location = new System.Drawing.Point(77, 12);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(100, 100);
+            this.pictureBox1.TabIndex = 14;
+            this.pictureBox1.TabStop = false;
+            // 
             // InventoryForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoValidate = System.Windows.Forms.AutoValidate.EnablePreventFocusChange;
             this.ClientSize = new System.Drawing.Size(796, 530);
+            this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.finished_list_header);
             this.Controls.Add(this.run_button);
             this.Controls.Add(this.files_header_label);
@@ -186,9 +201,11 @@
             this.Controls.Add(this.files_selected_list);
             this.Controls.Add(this.sub_header_label);
             this.Controls.Add(this.main_header_label);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "InventoryForm";
             this.Text = "IAS";
             this.Load += new System.EventHandler(this.InventoryForm_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -209,6 +226,7 @@
         private System.Windows.Forms.Label files_header_label;
         private System.Windows.Forms.Button run_button;
         private System.Windows.Forms.Label finished_list_header;
+        private System.Windows.Forms.PictureBox pictureBox1;
     }
 }
 

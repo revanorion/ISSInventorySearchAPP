@@ -76,6 +76,9 @@ namespace ISSISA_Library
                 OleDbDataAdapter myCommand = new OleDbDataAdapter(" SELECT * from [" + sheetName + "$]", con);
                 bool ignore = true;
                 myCommand.Fill(myDataSet);
+                DataTable d;
+               // d = myDataSet.Tables[0];
+               // d.WriteXml("c:\\myxml.xml");
                 con.Close();
 
                 //Travers through each row in the dataset
