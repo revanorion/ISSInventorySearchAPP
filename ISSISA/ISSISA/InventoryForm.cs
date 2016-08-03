@@ -42,7 +42,7 @@ namespace ISSISA
             finished_files_list.DisplayMember = "name";		//only takes 1 property
             finished_files_list.ValueMember = "name";
 
-            //MaximizeBox = false;
+            MaximizeBox = false;
             MinimizeBox = false;
             this.files_selected_list.BackColor = Color.AliceBlue;
             this.finished_files_list.BackColor = Color.AliceBlue;
@@ -202,7 +202,7 @@ namespace ISSISA
             {
                 MessageBox.Show("No process ran or no devices found!");
             }
-            Cursor.Current = Cursors.WaitCursor;
+            Cursor.Current = Cursors.Default;
         }
     }
 }
