@@ -118,7 +118,7 @@ namespace ISSISA_Library
             }
             catch (Exception ex)
             {
-                throw new Exception();
+                throw ex;
             }
             finally
             {
