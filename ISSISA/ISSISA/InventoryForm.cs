@@ -179,11 +179,18 @@ namespace ISSISA
         //event handeler for save file button. will take the data from compared list and write it to an excel file
         private void save_files_button_Click(object sender, EventArgs e)
         {
+
+            /*
+            This needs a dialog for saving missing files
+
+            */
+            
             Cursor.Current = Cursors.WaitCursor;
             sfd.Filter = "Excel Files (.xlsx)|*.xlsx|All Files (*.*)|*.*";
             sfd.FilterIndex = 1;
             if (files.found_devices != null)
             {
+                //This save Process is for found devices
                 sfd.FileName = files.finished_files[0].name;
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
@@ -197,12 +204,35 @@ namespace ISSISA
                         MessageBox.Show(ex.Message);
                     }
                 }
+                //This save process is for missing devices
+                sfd.FileName = files.finished_files[1].name;
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+
+                    try
+                    {
+                        files.write_missing_to_excel(sfd.FileName);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+                }
             }
             else
             {
                 MessageBox.Show("No process ran or no devices found!");
             }
             Cursor.Current = Cursors.Default;
+        }
+
+        private void displayHelp(object sender, MouseEventArgs e)
+        {
+            MessageBox.Show(@"Selected files must be csv or txt and must contain in the file name any of the values below.
+
+Tropos Export Data
+Wireless_Controllers                
+aps_wireless");
         }
     }
 }

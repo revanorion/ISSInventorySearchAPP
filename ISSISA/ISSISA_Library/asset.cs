@@ -25,7 +25,9 @@ namespace ISSISA_Library
         public string status { get; set; }
         public string device_name { get; set; }
         public string mac_address { get; set; }
+        public string ip_address { get; set; }
         public string controller_name { get; set; }
+        public string source { get; set; }
         public bool found { get; set; }
 
         //Default constructor that sets up all the property fields.
@@ -49,7 +51,9 @@ namespace ISSISA_Library
             status = "";
             device_name = "";
             mac_address = "";
+            ip_address = "";
             controller_name = "";
+            source = "";
             found = false;
         }
 
@@ -121,13 +125,16 @@ namespace ISSISA_Library
     Notes: {14} 
     Status: {15}                        
     Device Name: {16} 
-    Mac Address: {17} 
-    Controller Name: {18}
-    Found: {19}", asset_number, missing.ToString(), iss_division,
+    Mac Address: {17}
+    IP Address: {18} 
+    Controller Name: {19}
+    Source: {20}
+    Found: {21}", asset_number, missing.ToString(), iss_division,
                                                                       description, model, asset_type, location,
                                                                       physical_location, room_per_advantage, room_per_fats,
                                                                       cost, last_inv.ToString(), serial_number, fats_owner, notes,
-                                                                       status, device_name, mac_address, controller_name, found));
+                                                                       status, device_name, mac_address, ip_address,controller_name, 
+                                                                       source, found));
 
         }
     }
