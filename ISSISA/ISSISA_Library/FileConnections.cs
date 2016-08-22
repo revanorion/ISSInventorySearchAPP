@@ -77,8 +77,8 @@ namespace ISSISA_Library
                 bool ignore = true;
                 myCommand.Fill(myDataSet);
                 DataTable d;
-               // d = myDataSet.Tables[0];
-               // d.WriteXml("c:\\myxml.xml");
+                // d = myDataSet.Tables[0];
+                // d.WriteXml("c:\\myxml.xml");
                 con.Close();
 
                 //Travers through each row in the dataset
@@ -170,6 +170,8 @@ namespace ISSISA_Library
                 csvType = 'W';
             else if (x.name.Contains("aps_wireless"))
                 csvType = 'A';
+            else if (x.name.Contains("UPS"))
+                csvType = 'U';
             else
                 throw new NotSupportedException();
 
@@ -215,6 +217,19 @@ namespace ISSISA_Library
                                 a.physical_location = parts.ElementAt(5);
                                 a.controller_name = parts.ElementAt(6);
                                 break;
+                            case 'U':
+                                if (parts.ToArray().Length > 6)
+                                    a.serial_number = parts.ElementAt(3).Replace("\"", "");
+                                else
+                                    continue;                               
+                                if(a.serial_number==null || a.serial_number=="" || a.serial_number.Contains("Serial Number"))
+                                    continue;
+                                a.ip_address = parts.ElementAt(0).Replace("\"", "");
+                                a.hostname = parts.ElementAt(1).Replace("\"", "");
+                                a.model = parts.ElementAt(2).Replace("\"", "");                               
+                                a.firmware = parts.ElementAt(4).Replace("\"", "");
+                                a.physical_location = parts.ElementAt(5).Replace("\"", "") +" "+ parts.ElementAt(6).Replace("\"", "");                               
+                                break;
                         }
                         a.source = x.name;
                         imported_devices.Add(a);
@@ -242,6 +257,8 @@ namespace ISSISA_Library
                         open_csv_file(x, "AP Name", "Disassociated AP(s)");
                     else if (x.name.Contains("Wireless_Controllers"))
                         open_csv_file(x, "Controller Name");
+                    else
+                        open_csv_file(x);
                     break;
                 case ".txt":
                     open_text_dump(x);
@@ -351,8 +368,10 @@ namespace ISSISA_Library
             ws.Cells[rows, columns++] = "Status";
             ws.Cells[rows, columns++] = "Device Name";
             ws.Cells[rows, columns++] = "Mac Address";
-            ws.Cells[rows, columns++] = "IP Address";            
+            ws.Cells[rows, columns++] = "IP Address";
+            ws.Cells[rows, columns++] = "Hostname";
             ws.Cells[rows, columns++] = "Controller Name";
+            ws.Cells[rows, columns++] = "Firmware";
             ws.Cells[rows++, columns] = "Source";
             columns = 1;
             //write the data
@@ -377,7 +396,9 @@ namespace ISSISA_Library
                 ws.Cells[rows, columns++] = a.device_name;
                 ws.Cells[rows, columns++] = a.mac_address;
                 ws.Cells[rows, columns++] = a.ip_address;
+                ws.Cells[rows, columns++] = a.hostname;
                 ws.Cells[rows, columns++] = a.controller_name;
+                ws.Cells[rows, columns++] = a.firmware;
                 ws.Cells[rows++, columns] = a.source;
                 columns = 1;
             }
@@ -386,7 +407,7 @@ namespace ISSISA_Library
             ws.Columns.AutoFit();
             wb.SaveAs(x);
             //open the saved file
-            
+
             open_excel_file(x);
 
         }
@@ -433,7 +454,9 @@ namespace ISSISA_Library
             ws.Cells[rows, columns++] = "Device Name";
             ws.Cells[rows, columns++] = "Mac Address";
             ws.Cells[rows, columns++] = "IP Address";
+            ws.Cells[rows, columns++] = "Hostname";
             ws.Cells[rows, columns++] = "Controller Name";
+            ws.Cells[rows, columns++] = "Firmware";
             ws.Cells[rows++, columns] = "Source";
 
             columns = 1;
@@ -459,7 +482,9 @@ namespace ISSISA_Library
                 ws.Cells[rows, columns++] = a.device_name;
                 ws.Cells[rows, columns++] = a.mac_address;
                 ws.Cells[rows, columns++] = a.ip_address;
+                ws.Cells[rows, columns++] = a.hostname;
                 ws.Cells[rows, columns++] = a.controller_name;
+                ws.Cells[rows, columns++] = a.firmware;
                 ws.Cells[rows++, columns] = a.source;
                 columns = 1;
             }
@@ -467,7 +492,7 @@ namespace ISSISA_Library
             //save the file using the param as the path and name
             ws.Columns.AutoFit();
             wb.SaveAs(x);
-           
+
             //open the saved file
 
             open_excel_file(x);
@@ -490,11 +515,12 @@ namespace ISSISA_Library
                 {
 
                     //update some of the found device fields by combining data
-                    existingAsset.description = existingAsset.description + a.description;
+                    if (!String.IsNullOrEmpty(a.description))
+                        existingAsset.description = existingAsset.description + " (" + a.description + ")";
                     if (!String.IsNullOrEmpty(a.model))
-                        existingAsset.model = existingAsset.model + "(" + a.model + ")";
+                        existingAsset.model = existingAsset.model + " (" + a.model + ")";
                     if (!String.IsNullOrEmpty(a.physical_location))
-                        existingAsset.physical_location = existingAsset.physical_location + "(" + a.physical_location + ")";
+                        existingAsset.physical_location = existingAsset.physical_location + " (" + a.physical_location + ")";
                     existingAsset.serial_number = a.serial_number;
                     existingAsset.status = a.status;
                     existingAsset.device_name = a.device_name;
@@ -502,6 +528,8 @@ namespace ISSISA_Library
                     existingAsset.ip_address = a.ip_address;
                     existingAsset.controller_name = a.controller_name;
                     existingAsset.source = a.source;
+                    existingAsset.hostname = a.hostname;
+                    existingAsset.firmware = a.firmware;
                     //this field is used to show that a match has been found between data sets.
                     existingAsset.found = true;
                     a.found = true;
@@ -560,7 +588,7 @@ namespace ISSISA_Library
             //get the current date
             string date = DateTime.Now.ToShortDateString().Replace("/", "");
             //add report to finished files list
-            finished_files.Add(new fileNaming(date+ " Inventory Report "));
+            finished_files.Add(new fileNaming(date + " Inventory Report "));
             finished_files.Add(new fileNaming(date + " Missing Inventory Report "));
         }
 

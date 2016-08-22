@@ -26,6 +26,8 @@ namespace ISSISA_Library
         public string device_name { get; set; }
         public string mac_address { get; set; }
         public string ip_address { get; set; }
+        public string hostname { get; set; }
+        public string firmware { get; set; }        
         public string controller_name { get; set; }
         public string source { get; set; }
         public bool found { get; set; }
@@ -126,15 +128,17 @@ namespace ISSISA_Library
     Status: {15}                        
     Device Name: {16} 
     Mac Address: {17}
-    IP Address: {18} 
-    Controller Name: {19}
-    Source: {20}
-    Found: {21}", asset_number, missing.ToString(), iss_division,
+    IP Address: {18}
+    Hostname: {19}
+    Firmware {20} 
+    Controller Name: {21}
+    Source: {22}
+    Found: {23}", asset_number, missing.ToString(), iss_division,
                                                                       description, model, asset_type, location,
                                                                       physical_location, room_per_advantage, room_per_fats,
                                                                       cost, last_inv.ToString(), serial_number, fats_owner, notes,
-                                                                       status, device_name, mac_address, ip_address,controller_name, 
-                                                                       source, found));
+                                                                       status, device_name, mac_address, ip_address, hostname, 
+                                                                       firmware, controller_name, source, found));
 
         }
     }
