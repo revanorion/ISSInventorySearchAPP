@@ -34,7 +34,7 @@ namespace ISSISA
             files_selected_list.DisplayMember = "name";		//only takes 1 property
             files_selected_list.ValueMember = "name";
 
-            fiscal_book_label.Text = files.fiscal_book_address;
+            fiscal_book_label.Text = files.fiscal_book_address;            
 
             //binds the data source to the list
             finishedFilesBinding.DataSource = files.finished_files;
