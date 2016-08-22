@@ -200,13 +200,16 @@ namespace ISSISA_Library
                                 break;
                             case 'W':
                                 a.controller_name = parts.ElementAt(0);
+                                a.ip_address = parts.ElementAt(1);
                                 a.physical_location = parts.ElementAt(2);
+                                a.status = parts.ElementAt(3);
                                 a.serial_number = parts.ElementAt(4);
                                 a.model = parts.ElementAt(5);
                                 break;
                             case 'A':
                                 a.device_name = parts.ElementAt(0);
                                 a.mac_address = parts.ElementAt(1);
+                                a.ip_address = parts.ElementAt(2);
                                 a.serial_number = parts.ElementAt(3);
                                 a.model = parts.ElementAt(4);
                                 a.physical_location = parts.ElementAt(5);
