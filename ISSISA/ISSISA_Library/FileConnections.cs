@@ -194,6 +194,7 @@ namespace ISSISA_Library
                         {
                             case 'T':
                                 a.serial_number = parts.ElementAt(0);
+                                a.ip_address = parts.ElementAt(1);
                                 a.status = parts.ElementAt(2);
                                 a.physical_location = parts.ElementAt(3);
                                 break;
@@ -212,6 +213,7 @@ namespace ISSISA_Library
                                 a.controller_name = parts.ElementAt(6);
                                 break;
                         }
+                        a.source = x.name;
                         imported_devices.Add(a);
                     }
                 }
@@ -298,6 +300,7 @@ namespace ISSISA_Library
                             a.device_name = deviceName;
                             if (masterSN == sn)
                                 a.description = "Master SN";
+                            a.source = x.name;
                             imported_devices.Add(a);
                         }
                     }
@@ -305,6 +308,87 @@ namespace ISSISA_Library
                 sr.Close();
             }
         }
+
+
+
+        public void write_missing_to_excel(string x)
+        {
+            if (xlApp == null)
+            {
+                Console.WriteLine("EXCEL could not be started. Check that your office installation and project references are correct.");
+                return;
+            }
+            xlApp.Visible = false;
+            Excel.Workbook wb = xlApp.Workbooks.Add(Excel.XlWBATemplate.xlWBATWorksheet);
+            Excel.Worksheet ws = (Excel.Worksheet)wb.Worksheets[1];
+
+            if (ws == null)
+            {
+                Console.WriteLine("Worksheet could not be created. Check that your office installation and project references are correct.");
+            }
+            int rows = 1, columns = 1;
+
+            //write the headers           
+
+            ws.Cells[rows, columns++] = "Asset #";
+            ws.Cells[rows, columns++] = "Missing " + fiscal_book_address.Substring(3, 4);
+            ws.Cells[rows, columns++] = "ISS Divison";
+            ws.Cells[rows, columns++] = "Description";
+            ws.Cells[rows, columns++] = "Model";
+            ws.Cells[rows, columns++] = "Asset Type";
+            ws.Cells[rows, columns++] = "Location";
+            ws.Cells[rows, columns++] = "Physical Location";
+            ws.Cells[rows, columns++] = "Room Per Advantage #";
+            ws.Cells[rows, columns++] = "Room Per FATS";
+            ws.Cells[rows, columns++] = "Cost";
+            ws.Cells[rows, columns++] = "Last Inv";
+            ws.Cells[rows, columns++] = "Serial # ";
+            ws.Cells[rows, columns++] = "FATS Owner";
+            ws.Cells[rows, columns++] = "Notes";
+            ws.Cells[rows, columns++] = "Status";
+            ws.Cells[rows, columns++] = "Device Name";
+            ws.Cells[rows, columns++] = "Mac Address";
+            ws.Cells[rows, columns++] = "IP Address";            
+            ws.Cells[rows, columns++] = "Controller Name";
+            ws.Cells[rows++, columns] = "Source";
+            columns = 1;
+            //write the data
+            foreach (asset a in imported_devices.Where(n => !n.found))
+            {
+                ws.Cells[rows, columns++] = a.asset_number;
+                ws.Cells[rows, columns++] = a.missing.ToString();
+                ws.Cells[rows, columns++] = a.iss_division;
+                ws.Cells[rows, columns++] = a.description;
+                ws.Cells[rows, columns++] = a.model;
+                ws.Cells[rows, columns++] = a.asset_type;
+                ws.Cells[rows, columns++] = a.location;
+                ws.Cells[rows, columns++] = a.physical_location;
+                ws.Cells[rows, columns++] = a.room_per_advantage;
+                ws.Cells[rows, columns++] = a.room_per_fats;
+                ws.Cells[rows, columns++] = a.cost;
+                ws.Cells[rows, columns++] = a.last_inv.ToString();
+                ws.Cells[rows, columns++] = a.serial_number;
+                ws.Cells[rows, columns++] = a.fats_owner;
+                ws.Cells[rows, columns++] = a.notes;
+                ws.Cells[rows, columns++] = a.status;
+                ws.Cells[rows, columns++] = a.device_name;
+                ws.Cells[rows, columns++] = a.mac_address;
+                ws.Cells[rows, columns++] = a.ip_address;
+                ws.Cells[rows, columns++] = a.controller_name;
+                ws.Cells[rows++, columns] = a.source;
+                columns = 1;
+            }
+
+            //save the file using the param as the path and name
+            ws.Columns.AutoFit();
+            wb.SaveAs(x);
+            //open the saved file
+            
+            open_excel_file(x);
+
+        }
+
+
 
         //this function handles writing the compared data to excel file.
         //calling functions: save button on form.
@@ -345,7 +429,9 @@ namespace ISSISA_Library
             ws.Cells[rows, columns++] = "Status";
             ws.Cells[rows, columns++] = "Device Name";
             ws.Cells[rows, columns++] = "Mac Address";
-            ws.Cells[rows++, columns] = "Controller Name";
+            ws.Cells[rows, columns++] = "IP Address";
+            ws.Cells[rows, columns++] = "Controller Name";
+            ws.Cells[rows++, columns] = "Source";
 
             columns = 1;
             //write the data
@@ -369,13 +455,16 @@ namespace ISSISA_Library
                 ws.Cells[rows, columns++] = a.status;
                 ws.Cells[rows, columns++] = a.device_name;
                 ws.Cells[rows, columns++] = a.mac_address;
-                ws.Cells[rows++, columns] = a.controller_name;
+                ws.Cells[rows, columns++] = a.ip_address;
+                ws.Cells[rows, columns++] = a.controller_name;
+                ws.Cells[rows++, columns] = a.source;
                 columns = 1;
             }
 
             //save the file using the param as the path and name
             ws.Columns.AutoFit();
             wb.SaveAs(x);
+           
             //open the saved file
 
             open_excel_file(x);
@@ -402,14 +491,17 @@ namespace ISSISA_Library
                     if (!String.IsNullOrEmpty(a.model))
                         existingAsset.model = existingAsset.model + "(" + a.model + ")";
                     if (!String.IsNullOrEmpty(a.physical_location))
-                        existingAsset.physical_location = existingAsset.location + "(" + a.physical_location + ")";
+                        existingAsset.physical_location = existingAsset.physical_location + "(" + a.physical_location + ")";
                     existingAsset.serial_number = a.serial_number;
                     existingAsset.status = a.status;
                     existingAsset.device_name = a.device_name;
                     existingAsset.mac_address = a.mac_address;
+                    existingAsset.ip_address = a.ip_address;
                     existingAsset.controller_name = a.controller_name;
+                    existingAsset.source = a.source;
                     //this field is used to show that a match has been found between data sets.
                     existingAsset.found = true;
+                    a.found = true;
                 }
                 else
                 {
@@ -465,7 +557,8 @@ namespace ISSISA_Library
             //get the current date
             string date = DateTime.Now.ToShortDateString().Replace("/", "");
             //add report to finished files list
-            finished_files.Add(new fileNaming("Inventory Report " + date));
+            finished_files.Add(new fileNaming(date+ " Inventory Report "));
+            finished_files.Add(new fileNaming(date + " Missing Inventory Report "));
         }
 
         //calling functions: write_to_excel
