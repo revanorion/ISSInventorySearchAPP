@@ -172,6 +172,8 @@ namespace ISSISA_Library
                 csvType = 'A';
             else if (x.name.Contains("UPS"))
                 csvType = 'U';
+            else if (x.name.Contains("Brocade switch"))
+                csvType = 'B';
             else
                 throw new NotSupportedException();
 
@@ -183,7 +185,7 @@ namespace ISSISA_Library
                     if (line == null)
                         break;
                     List<string> parts = line.Split(delimiters, StringSplitOptions.None).ToList();
-                    if (hasSkip && ignore && parts.Where(n => n.ToString() == skipUntil).ToList().Count() == 0)
+                    if (hasSkip && ignore && parts.Where(n => n.ToString().Replace("\"", "") == skipUntil).ToList().Count() == 0)
                         continue;
                     else if (hasBreak && parts.Where(n => n.ToString() == breakAt).ToList().Count() > 0)
                         break;
@@ -221,14 +223,27 @@ namespace ISSISA_Library
                                 if (parts.ToArray().Length > 6)
                                     a.serial_number = parts.ElementAt(3).Replace("\"", "");
                                 else
-                                    continue;                               
-                                if(a.serial_number==null || a.serial_number=="" || a.serial_number.Contains("Serial Number"))
+                                    continue;
+                                if (a.serial_number == null || a.serial_number == "" || a.serial_number.Contains("Serial Number"))
                                     continue;
                                 a.ip_address = parts.ElementAt(0).Replace("\"", "");
                                 a.hostname = parts.ElementAt(1).Replace("\"", "");
-                                a.model = parts.ElementAt(2).Replace("\"", "");                               
+                                a.model = parts.ElementAt(2).Replace("\"", "");
                                 a.firmware = parts.ElementAt(4).Replace("\"", "");
-                                a.physical_location = parts.ElementAt(5).Replace("\"", "") +" "+ parts.ElementAt(6).Replace("\"", "");                               
+                                a.physical_location = parts.ElementAt(5).Replace("\"", "") + " " + parts.ElementAt(6).Replace("\"", "");
+                                break;
+                            case 'B':
+                                a.status = parts.ElementAt(0).Replace("\"", "");
+                                a.device_name = parts.ElementAt(1).Replace("\"", "");
+                                a.ip_address = parts.ElementAt(4).Replace("\"", "");
+                                string serial = parts.ElementAt(6).Replace("\"", "");
+                                //do some crazy regex stuff to get all serials    
+                                //serial.Replace("Unit ")
+                                a.model = parts.ElementAt(8).Replace("\"", "");
+                                a.firmware = parts.ElementAt(9).Replace("\"", "");
+                                a.contact = parts.ElementAt(10).Replace("\"", "");
+                                a.physical_location = parts.ElementAt(11).Replace("\"", "");
+                                a.last_scanned = Convert.ToDateTime(parts.ElementAt(12).Replace("\"", ""));
                                 break;
                         }
                         a.source = x.name;
@@ -257,6 +272,8 @@ namespace ISSISA_Library
                         open_csv_file(x, "AP Name", "Disassociated AP(s)");
                     else if (x.name.Contains("Wireless_Controllers"))
                         open_csv_file(x, "Controller Name");
+                    else if (x.name.Contains("Brocade switch"))
+                        open_csv_file(x, "Product Status");
                     else
                         open_csv_file(x);
                     break;
@@ -372,6 +389,8 @@ namespace ISSISA_Library
             ws.Cells[rows, columns++] = "Hostname";
             ws.Cells[rows, columns++] = "Controller Name";
             ws.Cells[rows, columns++] = "Firmware";
+            ws.Cells[rows, columns++] = "Contact";
+            ws.Cells[rows, columns++] = "Last Scanned";
             ws.Cells[rows++, columns] = "Source";
             columns = 1;
             //write the data
@@ -399,6 +418,8 @@ namespace ISSISA_Library
                 ws.Cells[rows, columns++] = a.hostname;
                 ws.Cells[rows, columns++] = a.controller_name;
                 ws.Cells[rows, columns++] = a.firmware;
+                ws.Cells[rows, columns++] = a.contact;
+                ws.Cells[rows, columns++] = a.last_scanned.ToString();
                 ws.Cells[rows++, columns] = a.source;
                 columns = 1;
             }
@@ -457,6 +478,8 @@ namespace ISSISA_Library
             ws.Cells[rows, columns++] = "Hostname";
             ws.Cells[rows, columns++] = "Controller Name";
             ws.Cells[rows, columns++] = "Firmware";
+            ws.Cells[rows, columns++] = "Contact";
+            ws.Cells[rows, columns++] = "Last Scanned";
             ws.Cells[rows++, columns] = "Source";
 
             columns = 1;
@@ -485,6 +508,8 @@ namespace ISSISA_Library
                 ws.Cells[rows, columns++] = a.hostname;
                 ws.Cells[rows, columns++] = a.controller_name;
                 ws.Cells[rows, columns++] = a.firmware;
+                ws.Cells[rows, columns++] = a.contact;
+                ws.Cells[rows, columns++] = a.last_scanned.ToString();
                 ws.Cells[rows++, columns] = a.source;
                 columns = 1;
             }
