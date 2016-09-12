@@ -27,10 +27,14 @@ namespace ISSISA_Library
         public string mac_address { get; set; }
         public string ip_address { get; set; }
         public string hostname { get; set; }
-        public string firmware { get; set; }        
+        public string firmware { get; set; }
         public string controller_name { get; set; }
         public string source { get; set; }
+        public string contact { get; set; }
+        public DateTime last_scanned { get; set; }
         public bool found { get; set; }
+
+
 
         //Default constructor that sets up all the property fields.
         public asset()
@@ -56,7 +60,10 @@ namespace ISSISA_Library
             ip_address = "";
             controller_name = "";
             source = "";
+            contact = "";
+            //last_scanned = DateTime.Now;
             found = false;
+
         }
 
         //This constructor is used when getting data from an excel .xlsx fiscal book
@@ -133,12 +140,14 @@ namespace ISSISA_Library
     Firmware {20} 
     Controller Name: {21}
     Source: {22}
-    Found: {23}", asset_number, missing.ToString(), iss_division,
+    Contact: {23}
+    Last Scanned: {24}
+    Found: {25}", asset_number, missing.ToString(), iss_division,
                                                                       description, model, asset_type, location,
                                                                       physical_location, room_per_advantage, room_per_fats,
                                                                       cost, last_inv.ToString(), serial_number, fats_owner, notes,
-                                                                       status, device_name, mac_address, ip_address, hostname, 
-                                                                       firmware, controller_name, source, found));
+                                                                       status, device_name, mac_address, ip_address, hostname,
+                                                                       firmware, controller_name, source, contact, last_scanned, found));
 
         }
     }
