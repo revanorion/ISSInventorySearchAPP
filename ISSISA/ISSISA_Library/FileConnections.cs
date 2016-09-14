@@ -179,6 +179,8 @@ namespace ISSISA_Library
                 csvType = 'B';
             else if (x.name.Contains("Device List- total-assest"))
                 csvType = 'D';
+            else if (x.name.Contains("LMS switch and Router report"))
+                csvType = 'L';
             else
                 throw new NotSupportedException();
 
@@ -293,12 +295,35 @@ namespace ISSISA_Library
                                 a.room_number = parts.ElementAt(7);
                                 a.location = parts.ElementAt(8);
                                 break;
-                        }
+                            case 'L':
+                                if (parts.ElementAt(0) == "")
+                                    continue;
+                                a.device_name = parts.ElementAt(0);
+                                a.physical_location = parts.ElementAt(1);
+                                a.contact = parts.ElementAt(2);
+                                a.model = parts.ElementAt(3);
+                                a.serial_number = parts.ElementAt(5);
+                                string childSN = parts.ElementAt(7);
+                                if(childSN != null && childSN !="" && childSN!="N/A")
+                                {
+                                    asset child = new asset(a);
+                                    child.serial_number = childSN;
+                                    child.source = x.name;
+                                    imported_devices.Add(child);
+                                }
 
-                        if (a.serial_number != "")
+                                break;
+                        }
+                        a.source = x.name;
+                        //this is because i did a deep copy from asset a to b. 
+                        if (a.serial_number != "" && csvType!='B')
                         {
-                            a.source = x.name;
+                            
                             imported_devices.Add(a);
+                        }
+                        else if (csvType != 'B')
+                        {
+                            int i;
                         }
                     }
                 }
@@ -497,10 +522,14 @@ namespace ISSISA_Library
                         open_csv_file(x, "Product Status");
                     else if (x.name.Contains("Device List- total-assest"))
                         open_csv_file(x, "Type");
-                    else if (x.name.Contains("UPS"))
+                    else if (x.name.Contains("UPS") && x.name.Contains("Device List"))
                         open_csv_file(x, "Model");
-                    else
+                    else if (x.name.Contains("LMS switch and Router report"))
+                        open_csv_file(x,"Device Name");
+                    else if(x.name.Contains("device type - UPS"))
                         open_csv_file(x);
+                    else
+                        open_csv_file(x); 
                     break;
                 case ".txt":
                     open_text_dump(x);
@@ -544,9 +573,7 @@ namespace ISSISA_Library
                 DataSet myDataSet = new DataSet();
                 OleDbDataAdapter myCommand = new OleDbDataAdapter(" SELECT * from [" + sheetName + "$]", con);                
                 myCommand.Fill(myDataSet);
-                DataTable d;
-                // d = myDataSet.Tables[0];
-                // d.WriteXml("c:\\myxml.xml");
+                DataTable d;                
                 con.Close();
 
                 //Travers through each row in the dataset
