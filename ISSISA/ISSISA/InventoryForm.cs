@@ -233,7 +233,8 @@ namespace ISSISA
 Tropos Export Data
 Wireless_Controllers                
 aps_wireless
-UPS");
+UPS
+Brocade switch");
         }
     }
 }
