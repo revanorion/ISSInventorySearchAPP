@@ -228,13 +228,17 @@ namespace ISSISA
 
         private void displayHelp(object sender, MouseEventArgs e)
         {
-            MessageBox.Show(@"Selected files must be csv or txt and must contain in the file name any of the values below.
+            MessageBox.Show(@"Selected files must be csv, xls, or txt and must contain in the file name any of the values below.
 
 Tropos Export Data
 Wireless_Controllers                
 aps_wireless
-UPS
-Brocade switch");
+UPS yyyy Device List
+Brocade switch
+TMS-Inventory 
+Device List- total-assest
+device type - UPS
+Dump");
         }
     }
 }
