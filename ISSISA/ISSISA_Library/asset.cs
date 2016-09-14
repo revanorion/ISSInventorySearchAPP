@@ -4,7 +4,8 @@ using System.Text.RegularExpressions;
 namespace ISSISA_Library
 {
     public class asset
-    {
+    {      
+
         //Properties found in Fiscal Book
         public string asset_number { get; set; }
         public DateTime missing { get; set; }
@@ -31,7 +32,8 @@ namespace ISSISA_Library
         public string controller_name { get; set; }
         public string source { get; set; }
         public string contact { get; set; }
-        public DateTime last_scanned { get; set; }
+        public string last_scanned { get; set; }
+        public string room_number { get; set; }
         public bool found { get; set; }
 
 
@@ -61,7 +63,8 @@ namespace ISSISA_Library
             controller_name = "";
             source = "";
             contact = "";
-            //last_scanned = DateTime.Now;
+            last_scanned = "";
+            room_number = "";
             found = false;
 
         }
@@ -113,6 +116,35 @@ namespace ISSISA_Library
 
         }
 
+        public asset(asset a)
+        {        
+            asset_number = a.asset_number;
+            missing =a.missing;
+            cost = a.cost;
+            last_inv = a.last_inv;
+            serial_number = a.serial_number;
+            description = a.description;
+            iss_division = a.iss_division;
+            model = a.model;
+            asset_type = a.asset_type;
+            location = a.location;
+            physical_location = a.physical_location;
+            room_per_advantage = a.room_per_advantage;
+            room_per_fats = a.room_per_fats;
+            fats_owner = a.fats_owner;
+            notes = a.notes;
+            status = a.status;
+            device_name = a.device_name;
+            mac_address = a.mac_address;
+            ip_address = a.ip_address;
+            controller_name = a.controller_name;
+            source = a.source;
+            contact = a.contact;
+            last_scanned = a.last_scanned;
+            room_number = a.room_number;
+            found = a.found;
+        }
+
         //for debugging only
         public string output()
         {
@@ -142,12 +174,13 @@ namespace ISSISA_Library
     Source: {22}
     Contact: {23}
     Last Scanned: {24}
-    Found: {25}", asset_number, missing.ToString(), iss_division,
+    Room Number: {25}
+    Found: {26}", asset_number, missing.ToString(), iss_division,
                                                                       description, model, asset_type, location,
                                                                       physical_location, room_per_advantage, room_per_fats,
                                                                       cost, last_inv.ToString(), serial_number, fats_owner, notes,
                                                                        status, device_name, mac_address, ip_address, hostname,
-                                                                       firmware, controller_name, source, contact, last_scanned, found));
+                                                                       firmware, controller_name, source, contact, last_scanned, room_number, found));
 
         }
     }

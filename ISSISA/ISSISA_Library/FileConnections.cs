@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Data.OleDb;
 using System.Data;
+using System.Text.RegularExpressions;
+using Microsoft.VisualBasic.FileIO;
 
 namespace ISSISA_Library
 {
@@ -174,6 +176,8 @@ namespace ISSISA_Library
                 csvType = 'U';
             else if (x.name.Contains("Brocade switch"))
                 csvType = 'B';
+            else if (x.name.Contains("Device List- total-assest"))
+                csvType = 'D';
             else
                 throw new NotSupportedException();
 
@@ -184,6 +188,7 @@ namespace ISSISA_Library
                     string line = reader.ReadLine();
                     if (line == null)
                         break;
+
                     List<string> parts = line.Split(delimiters, StringSplitOptions.None).ToList();
                     if (hasSkip && ignore && parts.Where(n => n.ToString().Replace("\"", "") == skipUntil).ToList().Count() == 0)
                         continue;
@@ -233,28 +238,76 @@ namespace ISSISA_Library
                                 a.physical_location = parts.ElementAt(5).Replace("\"", "") + " " + parts.ElementAt(6).Replace("\"", "");
                                 break;
                             case 'B':
+
+                                string serial = parts.ElementAt(6).Replace("\"", "");
+                                List<string> serialList = serial.Split(';').ToList();
+                                if (serialList.Last() == "")
+                                    serialList.RemoveAt(serialList.Count() - 1);
+                                Regex r = new Regex(@"^Unit\s\d+\s-\s");
                                 a.status = parts.ElementAt(0).Replace("\"", "");
                                 a.device_name = parts.ElementAt(1).Replace("\"", "");
                                 a.ip_address = parts.ElementAt(4).Replace("\"", "");
-                                string serial = parts.ElementAt(6).Replace("\"", "");
-                                //do some crazy regex stuff to get all serials    
-                                //serial.Replace("Unit ")
                                 a.model = parts.ElementAt(8).Replace("\"", "");
                                 a.firmware = parts.ElementAt(9).Replace("\"", "");
                                 a.contact = parts.ElementAt(10).Replace("\"", "");
                                 a.physical_location = parts.ElementAt(11).Replace("\"", "");
-                                a.last_scanned = Convert.ToDateTime(parts.ElementAt(12).Replace("\"", ""));
+                                a.last_scanned = parts.ElementAt(12).Replace("\"", "");
+                                a.source = x.name;
+                                foreach (string s in serialList)
+                                {
+                                    asset b = new asset(a);
+                                    serial = s;
+                                    if (s.Contains("Unit"))
+                                    {
+                                        serial = r.Replace(s, "");
+                                    }
+                                    b.serial_number = serial;
+
+                                    imported_devices.Add(b);
+                                }
+                                break;
+                            case 'D':
+                                a.description = parts.ElementAt(0);
+                                a.model = parts.ElementAt(1);
+                                a.hostname = parts.ElementAt(2);
+                                a.device_name = parts.ElementAt(3);
+                                a.serial_number = parts.ElementAt(4);
+                                a.ip_address = parts.ElementAt(5);
+                                a.physical_location = parts.ElementAt(6).Replace("\"", "");
+                                a.mac_address = parts.ElementAt(7);
+                                a.contact = parts.ElementAt(8);
+                                a.room_number = parts.ElementAt(9);
+                                if (parts.ElementAt(10) != "")
+                                {
+                                    a.location = Convert.ToInt16(parts.ElementAt(10));
+                                    test(x);
+                                }
                                 break;
                         }
-                        a.source = x.name;
-                        imported_devices.Add(a);
+
+                        if (a.serial_number != "")
+                        {
+                            a.source = x.name;
+                            imported_devices.Add(a);
+                        }
                     }
                 }
                 reader.Close();
 
             }
         }
-
+        public void test(fileNaming x)
+        {
+            using (var csvParser = new TextFieldParser(new StringReader(x.path)))
+            {
+                csvParser.TextFieldType = Microsoft.VisualBasic.FileIO.FieldType.Delimited;
+                csvParser.Delimiters = new string[]{","};
+                //csvParser.HasFieldsEnclosedInQuotes = true;
+                string[] fields; 
+                while(!csvParser.EndOfData)
+                    fields = csvParser.ReadFields();
+            }
+        }
 
         //this function handles the type of file to be opened.
         //this is based both of file extension as well if the file contains the specified name
@@ -274,6 +327,8 @@ namespace ISSISA_Library
                         open_csv_file(x, "Controller Name");
                     else if (x.name.Contains("Brocade switch"))
                         open_csv_file(x, "Product Status");
+                    else if (x.name.Contains("Device List- total-assest"))
+                        open_csv_file(x, "Type");
                     else
                         open_csv_file(x);
                     break;
@@ -377,6 +432,7 @@ namespace ISSISA_Library
             ws.Cells[rows, columns++] = "Physical Location";
             ws.Cells[rows, columns++] = "Room Per Advantage #";
             ws.Cells[rows, columns++] = "Room Per FATS";
+            ws.Cells[rows, columns++] = "Room Number";
             ws.Cells[rows, columns++] = "Cost";
             ws.Cells[rows, columns++] = "Last Inv";
             ws.Cells[rows, columns++] = "Serial # ";
@@ -406,6 +462,7 @@ namespace ISSISA_Library
                 ws.Cells[rows, columns++] = a.physical_location;
                 ws.Cells[rows, columns++] = a.room_per_advantage;
                 ws.Cells[rows, columns++] = a.room_per_fats;
+                ws.Cells[rows, columns++] = a.room_number;
                 ws.Cells[rows, columns++] = a.cost;
                 ws.Cells[rows, columns++] = a.last_inv.ToString();
                 ws.Cells[rows, columns++] = a.serial_number;
@@ -466,6 +523,7 @@ namespace ISSISA_Library
             ws.Cells[rows, columns++] = "Physical Location";
             ws.Cells[rows, columns++] = "Room Per Advantage #";
             ws.Cells[rows, columns++] = "Room Per FATS";
+            ws.Cells[rows, columns++] = "Room Number";
             ws.Cells[rows, columns++] = "Cost";
             ws.Cells[rows, columns++] = "Last Inv";
             ws.Cells[rows, columns++] = "Serial # ";
@@ -496,6 +554,7 @@ namespace ISSISA_Library
                 ws.Cells[rows, columns++] = a.physical_location;
                 ws.Cells[rows, columns++] = a.room_per_advantage;
                 ws.Cells[rows, columns++] = a.room_per_fats;
+                ws.Cells[rows, columns++] = a.room_number;
                 ws.Cells[rows, columns++] = a.cost;
                 ws.Cells[rows, columns++] = a.last_inv.ToString();
                 ws.Cells[rows, columns++] = a.serial_number;
@@ -509,7 +568,7 @@ namespace ISSISA_Library
                 ws.Cells[rows, columns++] = a.controller_name;
                 ws.Cells[rows, columns++] = a.firmware;
                 ws.Cells[rows, columns++] = a.contact;
-                ws.Cells[rows, columns++] = a.last_scanned.ToString();
+                ws.Cells[rows, columns++] = a.last_scanned;
                 ws.Cells[rows++, columns] = a.source;
                 columns = 1;
             }
