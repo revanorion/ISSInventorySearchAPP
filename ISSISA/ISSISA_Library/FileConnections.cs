@@ -159,7 +159,6 @@ namespace ISSISA_Library
         public void open_csv_file(fileNaming x, string skipUntil = null, string breakAt = null)
         {
             bool hasSkip = false, hasBreak = false, ignore = true;
-            char[] delimiters = new char[] { ',' };
 
             if (skipUntil != null)
                 hasSkip = true;
@@ -172,6 +171,8 @@ namespace ISSISA_Library
                 csvType = 'W';
             else if (x.name.Contains("aps_wireless"))
                 csvType = 'A';
+            else if (x.name.Contains("device type - UPS"))
+                csvType = 'S';
             else if (x.name.Contains("UPS"))
                 csvType = 'U';
             else if (x.name.Contains("Brocade switch"))
@@ -181,15 +182,15 @@ namespace ISSISA_Library
             else
                 throw new NotSupportedException();
 
-            using (StreamReader reader = new StreamReader(x.path))
+            using (var csvParser = new TextFieldParser(x.path))
             {
-                while (true)
+                csvParser.TextFieldType = FieldType.Delimited;
+                csvParser.SetDelimiters(",");
+                csvParser.TrimWhiteSpace = true;
+                csvParser.HasFieldsEnclosedInQuotes = true;
+                while (!csvParser.EndOfData)
                 {
-                    string line = reader.ReadLine();
-                    if (line == null)
-                        break;
-
-                    List<string> parts = line.Split(delimiters, StringSplitOptions.None).ToList();
+                    List<string> parts = csvParser.ReadFields().ToList();
                     if (hasSkip && ignore && parts.Where(n => n.ToString().Replace("\"", "") == skipUntil).ToList().Count() == 0)
                         continue;
                     else if (hasBreak && parts.Where(n => n.ToString() == breakAt).ToList().Count() > 0)
@@ -224,7 +225,7 @@ namespace ISSISA_Library
                                 a.physical_location = parts.ElementAt(5);
                                 a.controller_name = parts.ElementAt(6);
                                 break;
-                            case 'U':
+                            case 'S':
                                 if (parts.ToArray().Length > 6)
                                     a.serial_number = parts.ElementAt(3).Replace("\"", "");
                                 else
@@ -267,6 +268,7 @@ namespace ISSISA_Library
                                 }
                                 break;
                             case 'D':
+
                                 a.description = parts.ElementAt(0);
                                 a.model = parts.ElementAt(1);
                                 a.hostname = parts.ElementAt(2);
@@ -277,11 +279,19 @@ namespace ISSISA_Library
                                 a.mac_address = parts.ElementAt(7);
                                 a.contact = parts.ElementAt(8);
                                 a.room_number = parts.ElementAt(9);
-                                if (parts.ElementAt(10) != "")
-                                {
-                                    a.location = Convert.ToInt16(parts.ElementAt(10));
-                                    test(x);
-                                }
+                                a.location = parts.ElementAt(10);
+
+                                break;
+                            case 'U':
+                                a.model = parts.ElementAt(0);
+                                a.hostname = parts.ElementAt(1);
+                                a.serial_number = parts.ElementAt(2);
+                                a.ip_address = parts.ElementAt(3);
+                                a.physical_location = parts.ElementAt(4);
+                                a.device_name = parts.ElementAt(5);
+                                a.contact = parts.ElementAt(6);
+                                a.room_number = parts.ElementAt(7);
+                                a.location = parts.ElementAt(8);
                                 break;
                         }
 
@@ -292,31 +302,189 @@ namespace ISSISA_Library
                         }
                     }
                 }
-                reader.Close();
-
-            }
-        }
-        public void test(fileNaming x)
-        {
-            using (var csvParser = new TextFieldParser(new StringReader(x.path)))
-            {
-                csvParser.TextFieldType = Microsoft.VisualBasic.FileIO.FieldType.Delimited;
-                csvParser.Delimiters = new string[]{","};
-                //csvParser.HasFieldsEnclosedInQuotes = true;
-                string[] fields; 
-                while(!csvParser.EndOfData)
-                    fields = csvParser.ReadFields();
             }
         }
 
+
+
+        //public void test(fileNaming x)
+        //{            
+        //    using (var csvParser = new TextFieldParser(x.path))
+        //    {
+        //        csvParser.TextFieldType = FieldType.Delimited;
+        //        csvParser.SetDelimiters(",");
+        //        csvParser.TrimWhiteSpace = true;
+        //        csvParser.HasFieldsEnclosedInQuotes = true;
+        //        while (!csvParser.EndOfData)
+        //        {
+        //            List<string>fieldRow = csvParser.ReadFields().ToList();
+
+        //            foreach (string fieldRowCell in fieldRow)
+        //            {
+        //                // todo
+        //            }
+        //        }
+        //    }
+        //}
+
+
+        //public void open_csv_file(fileNaming x, string skipUntil = null, string breakAt = null)
+        //{
+        //    test(x);
+
+
+        //    bool hasSkip = false, hasBreak = false, ignore = true;
+        //    char[] delimiters = new char[] { ',' };
+
+        //    if (skipUntil != null)
+        //        hasSkip = true;
+        //    if (breakAt != null)
+        //        hasBreak = true;
+        //    char csvType;
+        //    if (x.name.Contains("Tropos Export Data"))
+        //        csvType = 'T';
+        //    else if (x.name.Contains("Wireless_Controllers"))
+        //        csvType = 'W';
+        //    else if (x.name.Contains("aps_wireless"))
+        //        csvType = 'A';
+        //    else if (x.name.Contains("UPS"))
+        //        csvType = 'U';
+        //    else if (x.name.Contains("Brocade switch"))
+        //        csvType = 'B';
+        //    else if (x.name.Contains("Device List- total-assest"))
+        //        csvType = 'D';
+        //    else
+        //        throw new NotSupportedException();
+
+        //    using (StreamReader reader = new StreamReader(x.path))
+        //    {
+        //        while (true)
+        //        {
+        //            string line = reader.ReadLine();
+        //            if (line == null)
+        //                break;
+
+        //            List<string> parts = line.Split(delimiters, StringSplitOptions.None).ToList();
+        //            if (hasSkip && ignore && parts.Where(n => n.ToString().Replace("\"", "") == skipUntil).ToList().Count() == 0)
+        //                continue;
+        //            else if (hasBreak && parts.Where(n => n.ToString() == breakAt).ToList().Count() > 0)
+        //                break;
+        //            else if (ignore)
+        //                ignore = false;
+        //            else
+        //            {
+        //                asset a = new asset();
+        //                switch (csvType)
+        //                {
+        //                    case 'T':
+        //                        a.serial_number = parts.ElementAt(0);
+        //                        a.ip_address = parts.ElementAt(1);
+        //                        a.status = parts.ElementAt(2);
+        //                        a.physical_location = parts.ElementAt(3);
+        //                        break;
+        //                    case 'W':
+        //                        a.controller_name = parts.ElementAt(0);
+        //                        a.ip_address = parts.ElementAt(1);
+        //                        a.physical_location = parts.ElementAt(2);
+        //                        a.status = parts.ElementAt(3);
+        //                        a.serial_number = parts.ElementAt(4);
+        //                        a.model = parts.ElementAt(5);
+        //                        break;
+        //                    case 'A':
+        //                        a.device_name = parts.ElementAt(0);
+        //                        a.mac_address = parts.ElementAt(1);
+        //                        a.ip_address = parts.ElementAt(2);
+        //                        a.serial_number = parts.ElementAt(3);
+        //                        a.model = parts.ElementAt(4);
+        //                        a.physical_location = parts.ElementAt(5);
+        //                        a.controller_name = parts.ElementAt(6);
+        //                        break;
+        //                    case 'U':
+        //                        if (parts.ToArray().Length > 6)
+        //                            a.serial_number = parts.ElementAt(3).Replace("\"", "");
+        //                        else
+        //                            continue;
+        //                        if (a.serial_number == null || a.serial_number == "" || a.serial_number.Contains("Serial Number"))
+        //                            continue;
+        //                        a.ip_address = parts.ElementAt(0).Replace("\"", "");
+        //                        a.hostname = parts.ElementAt(1).Replace("\"", "");
+        //                        a.model = parts.ElementAt(2).Replace("\"", "");
+        //                        a.firmware = parts.ElementAt(4).Replace("\"", "");
+        //                        a.physical_location = parts.ElementAt(5).Replace("\"", "") + " " + parts.ElementAt(6).Replace("\"", "");
+        //                        break;
+        //                    case 'B':
+
+        //                        string serial = parts.ElementAt(6).Replace("\"", "");
+        //                        List<string> serialList = serial.Split(';').ToList();
+        //                        if (serialList.Last() == "")
+        //                            serialList.RemoveAt(serialList.Count() - 1);
+        //                        Regex r = new Regex(@"^Unit\s\d+\s-\s");
+        //                        a.status = parts.ElementAt(0).Replace("\"", "");
+        //                        a.device_name = parts.ElementAt(1).Replace("\"", "");
+        //                        a.ip_address = parts.ElementAt(4).Replace("\"", "");
+        //                        a.model = parts.ElementAt(8).Replace("\"", "");
+        //                        a.firmware = parts.ElementAt(9).Replace("\"", "");
+        //                        a.contact = parts.ElementAt(10).Replace("\"", "");
+        //                        a.physical_location = parts.ElementAt(11).Replace("\"", "");
+        //                        a.last_scanned = parts.ElementAt(12).Replace("\"", "");
+        //                        a.source = x.name;
+        //                        foreach (string s in serialList)
+        //                        {
+        //                            asset b = new asset(a);
+        //                            serial = s;
+        //                            if (s.Contains("Unit"))
+        //                            {
+        //                                serial = r.Replace(s, "");
+        //                            }
+        //                            b.serial_number = serial;
+
+        //                            imported_devices.Add(b);
+        //                        }
+        //                        break;
+        //                    case 'D':
+        //                        a.description = parts.ElementAt(0);
+        //                        a.model = parts.ElementAt(1);
+        //                        a.hostname = parts.ElementAt(2);
+        //                        a.device_name = parts.ElementAt(3);
+        //                        a.serial_number = parts.ElementAt(4);
+        //                        a.ip_address = parts.ElementAt(5);
+        //                        a.physical_location = parts.ElementAt(6).Replace("\"", "");
+        //                        a.mac_address = parts.ElementAt(7);
+        //                        a.contact = parts.ElementAt(8);
+        //                        a.room_number = parts.ElementAt(9);
+        //                        if (parts.ElementAt(10) != "")
+        //                        {
+        //                            a.location = Convert.ToInt16(parts.ElementAt(10));
+
+        //                        }
+        //                        break;
+        //                }
+
+        //                if (a.serial_number != "")
+        //                {
+        //                    a.source = x.name;
+        //                    imported_devices.Add(a);
+        //                }
+        //            }
+        //        }
+        //        reader.Close();
+
+        //    }
+        //}
         //this function handles the type of file to be opened.
         //this is based both of file extension as well if the file contains the specified name
         //calling functions: import_data
+
+
         public void open_file(fileNaming x)
         {
             switch (x.type)
             {
                 case ".xlsx":
+                    break;
+                case ".xls":
+                    if (x.name.Contains("TMS-Inventory"))
+                        open_xls_file(x);
                     break;
                 case ".csv":
                     if (x.name.Contains("Tropos"))
@@ -329,6 +497,8 @@ namespace ISSISA_Library
                         open_csv_file(x, "Product Status");
                     else if (x.name.Contains("Device List- total-assest"))
                         open_csv_file(x, "Type");
+                    else if (x.name.Contains("UPS"))
+                        open_csv_file(x, "Model");
                     else
                         open_csv_file(x);
                     break;
@@ -337,6 +507,86 @@ namespace ISSISA_Library
                     break;
                 default:
                     throw new NotSupportedException();
+            }
+        }
+
+        private void open_xls_file(fileNaming x, string skipUntil = null, string breakAt = null)
+        {
+            bool hasSkip = false, hasBreak = false, ignore = true;
+
+            if (skipUntil == null && breakAt == null)
+                ignore = false;
+            if (skipUntil != null)
+                hasSkip = true;
+            if (breakAt != null)
+                hasBreak = true;
+            char xlsType;
+            if (x.name.Contains("TMS-Inventory"))
+                xlsType = 'T';
+            else
+                throw new NotSupportedException();
+            string sheetName = "";
+            switch(xlsType)
+            {
+                case 'T':
+                    sheetName = "TMS Excel Export 1";
+                    break;
+                default:
+                    sheetName = "Sheet1";
+                    break;
+            }
+            OleDbConnection con = new OleDbConnection(@"Provider=Microsoft.Jet.OLEDB.4.0;Data Source="+x.path+@";Extended Properties=""Excel 8.0;HDR=YES;""");
+            con.Open();
+
+            try
+            {
+                //Create Dataset and fill with imformation from the Excel Spreadsheet for easier reference
+                DataSet myDataSet = new DataSet();
+                OleDbDataAdapter myCommand = new OleDbDataAdapter(" SELECT * from [" + sheetName + "$]", con);                
+                myCommand.Fill(myDataSet);
+                DataTable d;
+                // d = myDataSet.Tables[0];
+                // d.WriteXml("c:\\myxml.xml");
+                con.Close();
+
+                //Travers through each row in the dataset
+                foreach (DataRow myDataRow in myDataSet.Tables[0].Rows)
+                {
+                    //Stores info in Datarow into an array
+                    Object[] cells = myDataRow.ItemArray;
+                    //Traverse through each array and put into object cellContent as type Object
+                    //Using Object as for some reason the Dataset reads some blank value which
+                    //causes a hissy fit when trying to read. By using object I can convert to
+                    //String at a later point.
+                    var result = cells.Where(n => n.ToString() == skipUntil).ToList();
+                    if (result.Count == 0 && ignore)
+                        continue;
+                    else if (ignore)
+                        ignore = false;
+                    else
+                    {
+                        asset a = new asset();
+                        switch (xlsType)
+                        {
+                            case 'T':
+                                a.device_name = Convert.ToString(cells[0]);
+                                a.ip_address = Convert.ToString(cells[1]);
+                                a.description = Convert.ToString(cells[2]) + " (" + Convert.ToString(cells[4]) + ")";
+                                a.serial_number = Convert.ToString(cells[3]);                                
+                                break;
+                        }
+                        a.source = x.name;
+                        imported_devices.Add(a);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                con.Close();
             }
         }
 
@@ -605,6 +855,8 @@ namespace ISSISA_Library
                         existingAsset.model = existingAsset.model + " (" + a.model + ")";
                     if (!String.IsNullOrEmpty(a.physical_location))
                         existingAsset.physical_location = existingAsset.physical_location + " (" + a.physical_location + ")";
+                    if (!String.IsNullOrEmpty(a.location) && !existingAsset.location.Contains(a.location))
+                        existingAsset.location = existingAsset.location + " (" + a.location + ")";
                     existingAsset.serial_number = a.serial_number;
                     existingAsset.status = a.status;
                     existingAsset.device_name = a.device_name;

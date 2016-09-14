@@ -11,12 +11,13 @@ namespace ISSISA_Library
         public DateTime missing { get; set; }
         public double cost { get; set; }
         public DateTime last_inv { get; set; }
+        
         public string serial_number { get; set; }
         public string description { get; set; }
         public string iss_division { get; set; }
         public string model { get; set; }
         public string asset_type { get; set; }
-        public int location { get; set; }
+        public string location { get; set; }
         public string physical_location { get; set; }
         public string room_per_advantage { get; set; }
         public string room_per_fats { get; set; }
@@ -50,7 +51,7 @@ namespace ISSISA_Library
             iss_division = "";
             model = "";
             asset_type = "";
-            location = 0;
+            location = "";
             physical_location = "";
             room_per_advantage = "";
             room_per_fats = "";
@@ -89,7 +90,7 @@ namespace ISSISA_Library
             if (asset_type != Convert.DBNull)
                 this.asset_type = Convert.ToString(asset_type);
             if (location != Convert.DBNull)
-                this.location = Convert.ToInt16(location);
+                this.location = Convert.ToString(location);
             if (physical_location != Convert.DBNull)
                 this.physical_location = Convert.ToString(physical_location);
             if (room_per_advantage != Convert.DBNull)
