@@ -74,7 +74,7 @@ namespace ISSISA
         //event handeler for add file button. dialog will appear for user to select files 
         private void add_file_button_Click(object sender, EventArgs e)
         {
-            ofd.Filter = "CSV Files (.csv)|*.csv|Text Files (.txt)|*.txt|All Files (*.*)|*.*";
+            ofd.Filter = "CSV Files (.csv)|*.csv|Excel 97-2003 (.xls)|*.xls|Text Files (.txt)|*.txt|All Files (*.*)|*.*";
             ofd.FilterIndex = 1;
             ofd.Multiselect = true;
             if (ofd.ShowDialog() == DialogResult.OK)
