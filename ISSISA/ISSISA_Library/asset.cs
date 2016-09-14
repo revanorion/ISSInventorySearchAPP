@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace ISSISA_Library
@@ -36,7 +37,7 @@ namespace ISSISA_Library
         public string last_scanned { get; set; }
         public string room_number { get; set; }
         public bool found { get; set; }
-
+        public List<string> children { get; set; }
 
 
         //Default constructor that sets up all the property fields.
@@ -66,6 +67,7 @@ namespace ISSISA_Library
             contact = "";
             last_scanned = "";
             room_number = "";
+            children = new List<string>();
             found = false;
 
         }
@@ -114,7 +116,7 @@ namespace ISSISA_Library
             if (notes != Convert.DBNull)
                 this.notes = Convert.ToString(notes);
             found = false;
-
+            children = new List<string>();
         }
 
         public asset(asset a)
@@ -144,6 +146,8 @@ namespace ISSISA_Library
             last_scanned = a.last_scanned;
             room_number = a.room_number;
             found = a.found;
+            foreach (string c in a.children)
+                children.Add(c);
         }
 
         //for debugging only
