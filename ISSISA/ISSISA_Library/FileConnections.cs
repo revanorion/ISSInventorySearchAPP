@@ -159,6 +159,7 @@ namespace ISSISA_Library
         public void open_csv_file(fileNaming x, string skipUntil = null, string breakAt = null)
         {
             bool hasSkip = false, hasBreak = false, ignore = true;
+            string serial;
 
             if (skipUntil != null)
                 hasSkip = true;
@@ -242,7 +243,7 @@ namespace ISSISA_Library
                                 break;
                             case 'B':
 
-                                string serial = parts.ElementAt(6).Replace("\"", "");
+                                serial = parts.ElementAt(6).Replace("\"", "");
                                 List<string> serialList = serial.Split(';').ToList();
                                 if (serialList.Last() == "")
                                     serialList.RemoveAt(serialList.Count() - 1);
@@ -298,27 +299,35 @@ namespace ISSISA_Library
                             case 'L':
                                 if (parts.ElementAt(0) == "")
                                     continue;
-                                a.device_name = parts.ElementAt(0);
-                                a.physical_location = parts.ElementAt(1);
-                                a.contact = parts.ElementAt(2);
-                                a.model = parts.ElementAt(3);
-                                a.serial_number = parts.ElementAt(5);
+                                serial = parts.ElementAt(5);
+
+                                a = imported_devices.FirstOrDefault(p => p.serial_number == serial);
                                 string childSN = parts.ElementAt(7);
-                                if(childSN != null && childSN !="" && childSN!="N/A")
+                                if (a == null)
                                 {
-                                    asset child = new asset(a);
-                                    child.serial_number = childSN;
-                                    child.source = x.name;
-                                    imported_devices.Add(child);
+                                    a = new asset();
+                                    a.device_name = parts.ElementAt(0);
+                                    a.physical_location = parts.ElementAt(1);
+                                    a.contact = parts.ElementAt(2);
+                                    a.model = parts.ElementAt(3);
+                                    a.serial_number = serial;
+                                    if (childSN != null && childSN != "" && childSN != "N/A")
+                                    {
+                                        a.children.Add(childSN);
+                                    }
+                                    imported_devices.Add(a);
+                                }
+                                else if (childSN != null && childSN != "" && childSN != "N/A")
+                                {
+                                    a.children.Add(childSN);
                                 }
 
                                 break;
                         }
                         a.source = x.name;
-                        //this is because i did a deep copy from asset a to b. 
-                        if (a.serial_number != "" && csvType!='B')
+                        //this is because i did a deep copy from asset a to b. L because special case that has children SN 
+                        if (a.serial_number != "" && csvType != 'B' && csvType != 'L')
                         {
-                            
                             imported_devices.Add(a);
                         }
                         else if (csvType != 'B')
@@ -525,11 +534,11 @@ namespace ISSISA_Library
                     else if (x.name.Contains("UPS") && x.name.Contains("Device List"))
                         open_csv_file(x, "Model");
                     else if (x.name.Contains("LMS switch and Router report"))
-                        open_csv_file(x,"Device Name");
-                    else if(x.name.Contains("device type - UPS"))
+                        open_csv_file(x, "Device Name");
+                    else if (x.name.Contains("device type - UPS"))
                         open_csv_file(x);
                     else
-                        open_csv_file(x); 
+                        open_csv_file(x);
                     break;
                 case ".txt":
                     open_text_dump(x);
@@ -555,7 +564,7 @@ namespace ISSISA_Library
             else
                 throw new NotSupportedException();
             string sheetName = "";
-            switch(xlsType)
+            switch (xlsType)
             {
                 case 'T':
                     sheetName = "TMS Excel Export 1";
@@ -564,16 +573,16 @@ namespace ISSISA_Library
                     sheetName = "Sheet1";
                     break;
             }
-            OleDbConnection con = new OleDbConnection(@"Provider=Microsoft.Jet.OLEDB.4.0;Data Source="+x.path+@";Extended Properties=""Excel 8.0;HDR=YES;""");
+            OleDbConnection con = new OleDbConnection(@"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + x.path + @";Extended Properties=""Excel 8.0;HDR=YES;""");
             con.Open();
 
             try
             {
                 //Create Dataset and fill with imformation from the Excel Spreadsheet for easier reference
                 DataSet myDataSet = new DataSet();
-                OleDbDataAdapter myCommand = new OleDbDataAdapter(" SELECT * from [" + sheetName + "$]", con);                
+                OleDbDataAdapter myCommand = new OleDbDataAdapter(" SELECT * from [" + sheetName + "$]", con);
                 myCommand.Fill(myDataSet);
-                DataTable d;                
+                DataTable d;
                 con.Close();
 
                 //Travers through each row in the dataset
@@ -599,7 +608,7 @@ namespace ISSISA_Library
                                 a.device_name = Convert.ToString(cells[0]);
                                 a.ip_address = Convert.ToString(cells[1]);
                                 a.description = Convert.ToString(cells[2]) + " (" + Convert.ToString(cells[4]) + ")";
-                                a.serial_number = Convert.ToString(cells[3]);                                
+                                a.serial_number = Convert.ToString(cells[3]);
                                 break;
                         }
                         a.source = x.name;
@@ -712,7 +721,8 @@ namespace ISSISA_Library
             ws.Cells[rows, columns++] = "Room Number";
             ws.Cells[rows, columns++] = "Cost";
             ws.Cells[rows, columns++] = "Last Inv";
-            ws.Cells[rows, columns++] = "Serial # ";
+            ws.Cells[rows, columns++] = "Serial #";
+            ws.Cells[rows, columns++] = "Children SN";
             ws.Cells[rows, columns++] = "FATS Owner";
             ws.Cells[rows, columns++] = "Notes";
             ws.Cells[rows, columns++] = "Status";
@@ -743,6 +753,9 @@ namespace ISSISA_Library
                 ws.Cells[rows, columns++] = a.cost;
                 ws.Cells[rows, columns++] = a.last_inv.ToString();
                 ws.Cells[rows, columns++] = a.serial_number;
+                foreach (string child in a.children)
+                    ws.Cells[rows, columns] += child + ";";
+                columns++;
                 ws.Cells[rows, columns++] = a.fats_owner;
                 ws.Cells[rows, columns++] = a.notes;
                 ws.Cells[rows, columns++] = a.status;
@@ -803,7 +816,8 @@ namespace ISSISA_Library
             ws.Cells[rows, columns++] = "Room Number";
             ws.Cells[rows, columns++] = "Cost";
             ws.Cells[rows, columns++] = "Last Inv";
-            ws.Cells[rows, columns++] = "Serial # ";
+            ws.Cells[rows, columns++] = "Serial #";
+            ws.Cells[rows, columns++] = "Children SN";
             ws.Cells[rows, columns++] = "FATS Owner";
             ws.Cells[rows, columns++] = "Notes";
             ws.Cells[rows, columns++] = "Status";
@@ -835,6 +849,9 @@ namespace ISSISA_Library
                 ws.Cells[rows, columns++] = a.cost;
                 ws.Cells[rows, columns++] = a.last_inv.ToString();
                 ws.Cells[rows, columns++] = a.serial_number;
+                foreach (string child in a.children)
+                    ws.Cells[rows, columns] += child + ";";
+                columns++;
                 ws.Cells[rows, columns++] = a.fats_owner;
                 ws.Cells[rows, columns++] = a.notes;
                 ws.Cells[rows, columns++] = a.status;
@@ -874,28 +891,13 @@ namespace ISSISA_Library
                 asset existingAsset = found_devices.FirstOrDefault(x => x.serial_number.Contains(a.serial_number));
                 if (existingAsset != null)
                 {
+                    updateFoundAsset(existingAsset, a);
 
-                    //update some of the found device fields by combining data
-                    if (!String.IsNullOrEmpty(a.description))
-                        existingAsset.description = existingAsset.description + " (" + a.description + ")";
-                    if (!String.IsNullOrEmpty(a.model))
-                        existingAsset.model = existingAsset.model + " (" + a.model + ")";
-                    if (!String.IsNullOrEmpty(a.physical_location))
-                        existingAsset.physical_location = existingAsset.physical_location + " (" + a.physical_location + ")";
-                    if (!String.IsNullOrEmpty(a.location) && !existingAsset.location.Contains(a.location))
-                        existingAsset.location = existingAsset.location + " (" + a.location + ")";
-                    existingAsset.serial_number = a.serial_number;
-                    existingAsset.status = a.status;
-                    existingAsset.device_name = a.device_name;
-                    existingAsset.mac_address = a.mac_address;
-                    existingAsset.ip_address = a.ip_address;
-                    existingAsset.controller_name = a.controller_name;
-                    existingAsset.source = a.source;
-                    existingAsset.hostname = a.hostname;
-                    existingAsset.firmware = a.firmware;
-                    //this field is used to show that a match has been found between data sets.
-                    existingAsset.found = true;
-                    a.found = true;
+                    foreach (string child in a.children)
+                    {
+                        asset existingAsset2 = found_devices.FirstOrDefault(x => x.serial_number.Contains(child));
+                        updateFoundAsset(existingAsset2, a, false);
+                    }
                 }
                 else
                 {
@@ -903,6 +905,35 @@ namespace ISSISA_Library
                 }
             }
         }
+
+        public void updateFoundAsset(asset a, asset b, bool parent = true)
+        {
+            //update some of the found device fields by combining data
+            if (!String.IsNullOrEmpty(b.description))
+                a.description = a.description + " (" + b.description + ")";
+            if (!String.IsNullOrEmpty(b.model))
+                a.model = a.model + " (" + b.model + ")";
+            if (!String.IsNullOrEmpty(b.physical_location))
+                a.physical_location = a.physical_location + " (" + b.physical_location + ")";
+            if (!String.IsNullOrEmpty(b.location) && !a.location.Contains(b.location))
+                a.location = a.location + " (" + b.location + ")";
+            a.serial_number = b.serial_number;
+            a.status = b.status;
+            a.device_name = b.device_name;
+            a.mac_address = b.mac_address;
+            a.ip_address = b.ip_address;
+            a.controller_name = b.controller_name;
+            a.source = b.source;
+            a.hostname = b.hostname;
+            a.firmware = b.firmware;
+            //this field is used to show that a match has been found between data sets.
+            a.found = true;
+            b.found = true;
+            if (parent)
+                a.children = b.children;
+
+        }
+
 
         //used for debugging only
         public void show_imported_devices()
