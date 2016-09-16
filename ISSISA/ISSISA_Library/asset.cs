@@ -38,7 +38,7 @@ namespace ISSISA_Library
         public string room_number { get; set; }
         public bool found { get; set; }
         public List<string> children { get; set; }
-
+        public string master { get; set; }
 
         //Default constructor that sets up all the property fields.
         public asset()
@@ -68,6 +68,7 @@ namespace ISSISA_Library
             last_scanned = "";
             room_number = "";
             children = new List<string>();
+            master = "";
             found = false;
 
         }
@@ -146,8 +147,10 @@ namespace ISSISA_Library
             last_scanned = a.last_scanned;
             room_number = a.room_number;
             found = a.found;
+            children = new List<string>();
             foreach (string c in a.children)
                 children.Add(c);
+            master = a.master;
         }
 
         //for debugging only
@@ -188,5 +191,7 @@ namespace ISSISA_Library
                                                                        firmware, controller_name, source, contact, last_scanned, room_number, found));
 
         }
+
+       
     }
 }
