@@ -230,7 +230,7 @@ namespace ISSISA
         {
             MessageBox.Show(@"Selected files must be csv, xls, or txt and must contain in the file name any of the values below.
 
-Tropos Export Data
+Tropos
 Wireless_Controllers                
 aps_wireless
 UPS yyyy Device List
@@ -238,7 +238,10 @@ Brocade switch
 TMS-Inventory 
 Device List- total-assest
 device type - UPS
-Dump");
+Dump
+LMS switch and Router report
+Detailed_Router_Report_-_Yearly_Inventory
+Detailed_Switch_Report_-_Yearly_Inventory");
         }
     }
 }

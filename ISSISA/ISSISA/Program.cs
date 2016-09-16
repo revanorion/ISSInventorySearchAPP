@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ISSIAS;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,7 +23,7 @@ namespace ISSISA
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new InventoryForm());
+            Application.Run(new mainMidi());
 
            
         }
