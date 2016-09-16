@@ -27,7 +27,7 @@ namespace ISSISA_Library
         //as a result of comparting the previous two lists
         public List<asset> fb_assets = new List<asset>();
         public List<asset> imported_devices = new List<asset>();
-        public List<asset> found_devices;
+        public List<asset> found_devices = new List<asset>();
 
         //this private member holds the file properties for the fiscal book
         private fileNaming _fiscal_book_address = new fileNaming("No File Selected!");
