@@ -313,13 +313,13 @@ namespace ISSISA_Library
                                     a.serial_number = serial;
                                     if (childSN != null && childSN != "" && childSN != "N/A")
                                     {
-                                        a.children.Add(childSN);
+                                        addChild(a, childSN, x);
                                     }
                                     imported_devices.Add(a);
                                 }
                                 else if (childSN != null && childSN != "" && childSN != "N/A")
                                 {
-                                    a.children.Add(childSN);
+                                    addChild(a, childSN, x);
                                 }
 
                                 break;
@@ -339,7 +339,21 @@ namespace ISSISA_Library
             }
         }
 
+        //This is going to handle adding a child asset to the device list.
+        public void addChild(asset a, string childSN, fileNaming x)
+        {
+            a.children.Add(childSN);
 
+            asset b = new asset(a);
+
+
+            b.children.Clear();
+            b.master = a.serial_number;
+            b.source = x.name;
+            imported_devices.Add(b);
+
+
+        }
 
         //public void test(fileNaming x)
         //{            
@@ -722,6 +736,7 @@ namespace ISSISA_Library
             ws.Cells[rows, columns++] = "Cost";
             ws.Cells[rows, columns++] = "Last Inv";
             ws.Cells[rows, columns++] = "Serial #";
+            ws.Cells[rows, columns++] = "Master SN";
             ws.Cells[rows, columns++] = "Children SN";
             ws.Cells[rows, columns++] = "FATS Owner";
             ws.Cells[rows, columns++] = "Notes";
@@ -753,6 +768,8 @@ namespace ISSISA_Library
                 ws.Cells[rows, columns++] = a.cost;
                 ws.Cells[rows, columns++] = a.last_inv.ToString();
                 ws.Cells[rows, columns++] = a.serial_number;
+                ws.Cells[rows, columns++] = a.master;
+                ws.Cells[rows, columns] = "";
                 foreach (string child in a.children)
                     ws.Cells[rows, columns] += child + ";";
                 columns++;
@@ -817,6 +834,7 @@ namespace ISSISA_Library
             ws.Cells[rows, columns++] = "Cost";
             ws.Cells[rows, columns++] = "Last Inv";
             ws.Cells[rows, columns++] = "Serial #";
+            ws.Cells[rows, columns++] = "Master SN";
             ws.Cells[rows, columns++] = "Children SN";
             ws.Cells[rows, columns++] = "FATS Owner";
             ws.Cells[rows, columns++] = "Notes";
@@ -849,8 +867,13 @@ namespace ISSISA_Library
                 ws.Cells[rows, columns++] = a.cost;
                 ws.Cells[rows, columns++] = a.last_inv.ToString();
                 ws.Cells[rows, columns++] = a.serial_number;
+                ws.Cells[rows, columns++] = a.master;
+                ws.Cells[rows, columns] = "";
                 foreach (string child in a.children)
-                    ws.Cells[rows, columns] += child + ";";
+                {
+                    var cellValue = (string)(ws.Cells[rows, columns] as Excel.Range).Value;
+                    ws.Cells[rows, columns] = cellValue + child + ";";
+                }
                 columns++;
                 ws.Cells[rows, columns++] = a.fats_owner;
                 ws.Cells[rows, columns++] = a.notes;
@@ -893,11 +916,17 @@ namespace ISSISA_Library
                 {
                     updateFoundAsset(existingAsset, a);
 
-                    foreach (string child in a.children)
-                    {
-                        asset existingAsset2 = found_devices.FirstOrDefault(x => x.serial_number.Contains(child));
-                        updateFoundAsset(existingAsset2, a, false);
-                    }
+                    //foreach (string child in a.children)
+                    //{
+                    //    existingAsset = found_devices.FirstOrDefault(x => x.serial_number.Contains(child));
+                    //    if (existingAsset != null)
+                    //    {
+                    //        updateFoundAsset(existingAsset, a, false);
+                    //        //change the serial number back to the child then change the master sn
+                    //        existingAsset.serial_number = child;
+                    //        existingAsset.master = a.serial_number;                            
+                    //    }
+                    //}
                 }
                 else
                 {
