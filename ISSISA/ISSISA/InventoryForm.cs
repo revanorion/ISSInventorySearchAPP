@@ -24,7 +24,25 @@ namespace ISSISA
         BindingSource filesSelectedBinding = new BindingSource();
         BindingSource finishedFilesBinding = new BindingSource();
 
+
+        public FileConnections getData()
+        {
+            return files;
+        }
+
+        public InventoryForm(FileConnections a)
+        {
+            files = a;
+            init();
+        }
+
         public InventoryForm()
+        {
+            init();
+        }
+
+
+        private void init()
         {
             InitializeComponent();
 
@@ -34,7 +52,7 @@ namespace ISSISA
             files_selected_list.DisplayMember = "name";		//only takes 1 property
             files_selected_list.ValueMember = "name";
 
-            fiscal_book_label.Text = files.fiscal_book_address;            
+            fiscal_book_label.Text = files.fiscal_book_address;
 
             //binds the data source to the list
             finishedFilesBinding.DataSource = files.finished_files;
@@ -62,9 +80,9 @@ namespace ISSISA
 
 
             this.BackColor = Color.Cornsilk;
-
-
         }
+
+
 
         private void InventoryForm_Load(object sender, EventArgs e)
         {

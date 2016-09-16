@@ -103,6 +103,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="dataViewForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="dataViewForm.Designer.cs">
+      <DependentUpon>dataViewForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="InventoryForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -117,6 +123,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="dataViewForm.resx">
+      <DependentUpon>dataViewForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="InventoryForm.resx">
       <DependentUpon>InventoryForm.cs</DependentUpon>
     </EmbeddedResource>
