@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ISSISA.Properties {
+namespace ISSIAS.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace ISSISA.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ISSISA.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ISSIAS.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -66,6 +66,36 @@ namespace ISSISA.Properties {
         internal static System.Drawing.Bitmap ISS_logo3 {
             get {
                 object obj = ResourceManager.GetObject("ISS_logo3", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ISS_logoAsset {
+            get {
+                object obj = ResourceManager.GetObject("ISS_logoAsset", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ISS_logoAsseticon {
+            get {
+                object obj = ResourceManager.GetObject("ISS_logoAsseticon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap questionIcon {
+            get {
+                object obj = ResourceManager.GetObject("questionIcon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
