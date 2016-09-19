@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(mainMidi));
             this.menuStrip2 = new System.Windows.Forms.MenuStrip();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
@@ -48,7 +49,7 @@
             this.toolStripMenuItem2});
             this.menuStrip2.Location = new System.Drawing.Point(0, 0);
             this.menuStrip2.Name = "menuStrip2";
-            this.menuStrip2.Size = new System.Drawing.Size(768, 24);
+            this.menuStrip2.Size = new System.Drawing.Size(796, 24);
             this.menuStrip2.TabIndex = 1;
             this.menuStrip2.Text = "menuStrip2";
             // 
@@ -65,6 +66,7 @@
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
             this.toolStripMenuItem3.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem3.Text = "Exit";
+            this.toolStripMenuItem3.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // toolStripMenuItem2
             // 
@@ -78,7 +80,7 @@
             // toolStripMenuItem5
             // 
             this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-            this.toolStripMenuItem5.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(126, 22);
             this.toolStripMenuItem5.Text = "IAS";
             this.toolStripMenuItem5.Click += new System.EventHandler(this.iASToolStripMenuItem_Click);
             // 
@@ -90,7 +92,7 @@
             this.viewFoundToolStripMenuItem,
             this.viewMissingToolStripMenuItem});
             this.viewDataToolStripMenuItem.Name = "viewDataToolStripMenuItem";
-            this.viewDataToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.viewDataToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
             this.viewDataToolStripMenuItem.Text = "View Data";
             // 
             // toolStripMenuItem6
@@ -123,8 +125,9 @@
             // 
             // mainMidi
             // 
-            this.ClientSize = new System.Drawing.Size(768, 584);
+            this.ClientSize = new System.Drawing.Size(796, 584);
             this.Controls.Add(this.menuStrip2);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.IsMdiContainer = true;
             this.MainMenuStrip = this.menuStrip2;
             this.Name = "mainMidi";

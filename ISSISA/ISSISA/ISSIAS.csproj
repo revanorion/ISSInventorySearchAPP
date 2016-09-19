@@ -143,6 +143,7 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="ISSIAS_TemporaryKey.pfx" />
+    <None Include="ISS_logoAsset.pdn" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -173,6 +174,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="favicon.ico" />
+    <Content Include="ISS_logo3.jpg" />
     <Content Include="questionIcon.png" />
   </ItemGroup>
   <ItemGroup>

@@ -215,7 +215,7 @@ namespace ISSISA
 
                     try
                     {
-                        files.write_to_excel(sfd.FileName);
+                        files.write_to_excel(sfd.FileName, files.found_devices);
                     }
                     catch (Exception ex)
                     {
@@ -229,7 +229,7 @@ namespace ISSISA
 
                     try
                     {
-                        files.write_missing_to_excel(sfd.FileName);
+                        files.write_to_excel(sfd.FileName, files.missing_devices);
                     }
                     catch (Exception ex)
                     {
