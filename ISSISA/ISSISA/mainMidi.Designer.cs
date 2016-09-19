@@ -131,6 +131,7 @@
             this.IsMdiContainer = true;
             this.MainMenuStrip = this.menuStrip2;
             this.Name = "mainMidi";
+            this.Load += new System.EventHandler(this.mainMidi_Load);
             this.menuStrip2.ResumeLayout(false);
             this.menuStrip2.PerformLayout();
             this.ResumeLayout(false);
