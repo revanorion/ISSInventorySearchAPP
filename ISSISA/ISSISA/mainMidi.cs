@@ -122,5 +122,10 @@ namespace ISSIAS
                 i.Hide();
         }
 
+        private void mainMidi_Load(object sender, EventArgs e)
+        {
+            IAS.Show();
+        }
+
     }
 }

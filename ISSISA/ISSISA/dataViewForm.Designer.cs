@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(dataViewForm));
             this.assetDataView = new System.Windows.Forms.DataGridView();
             ((System.ComponentModel.ISupportInitialize)(this.assetDataView)).BeginInit();
             this.SuspendLayout();
@@ -49,6 +50,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
             this.ClientSize = new System.Drawing.Size(904, 508);
             this.Controls.Add(this.assetDataView);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "dataViewForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "dataViewForm";

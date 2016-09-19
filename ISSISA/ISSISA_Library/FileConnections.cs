@@ -319,7 +319,12 @@ namespace ISSISA_Library
                             case 'R':
                                 a.model = parts.ElementAt(0);
                                 a.device_name = parts.ElementAt(1);
-                                a.description = parts.ElementAt(3);
+                                int index = parts.ElementAt(3).IndexOf("RELEASE SOFTWARE");
+                                if (index != -1)
+                                    a.description = parts.ElementAt(3).Substring(0, index-2);
+                                else
+                                    a.description = parts.ElementAt(3);
+                                a.description.Replace(System.Environment.NewLine, "");
                                 a.physical_location = parts.ElementAt(4);
                                 a.contact = parts.ElementAt(5);
                                 a.serial_number = parts.ElementAt(6);
@@ -540,107 +545,7 @@ namespace ISSISA_Library
                 sr.Close();
             }
         }
-
-
-
-        public void write_missing_to_excel(string x)
-        {
-            if (xlApp == null)
-            {
-                Console.WriteLine("EXCEL could not be started. Check that your office installation and project references are correct.");
-                return;
-            }
-            xlApp.Visible = false;
-            Excel.Workbook wb = xlApp.Workbooks.Add(Excel.XlWBATemplate.xlWBATWorksheet);
-            Excel.Worksheet ws = (Excel.Worksheet)wb.Worksheets[1];
-
-            if (ws == null)
-            {
-                Console.WriteLine("Worksheet could not be created. Check that your office installation and project references are correct.");
-            }
-            int rows = 1, columns = 1;
-
-            //write the headers           
-
-            ws.Cells[rows, columns++] = "Asset #";
-            ws.Cells[rows, columns++] = "Missing " + fiscal_book_address.Substring(3, 4);
-            ws.Cells[rows, columns++] = "ISS Divison";
-            ws.Cells[rows, columns++] = "Description";
-            ws.Cells[rows, columns++] = "Model";
-            ws.Cells[rows, columns++] = "Asset Type";
-            ws.Cells[rows, columns++] = "Location";
-            ws.Cells[rows, columns++] = "Physical Location";
-            ws.Cells[rows, columns++] = "Room Per Advantage #";
-            ws.Cells[rows, columns++] = "Room Per FATS";
-            ws.Cells[rows, columns++] = "Room Number";
-            ws.Cells[rows, columns++] = "Cost";
-            ws.Cells[rows, columns++] = "Last Inv";
-            ws.Cells[rows, columns++] = "Serial #";
-            ws.Cells[rows, columns++] = "Master SN";
-            ws.Cells[rows, columns++] = "Children SN";
-            ws.Cells[rows, columns++] = "FATS Owner";
-            ws.Cells[rows, columns++] = "Notes";
-            ws.Cells[rows, columns++] = "Status";
-            ws.Cells[rows, columns++] = "Device Name";
-            ws.Cells[rows, columns++] = "Mac Address";
-            ws.Cells[rows, columns++] = "IP Address";
-            ws.Cells[rows, columns++] = "Hostname";
-            ws.Cells[rows, columns++] = "Controller Name";
-            ws.Cells[rows, columns++] = "Firmware";
-            ws.Cells[rows, columns++] = "Contact";
-            ws.Cells[rows, columns++] = "Last Scanned";
-            ws.Cells[rows++, columns] = "Source";
-            columns = 1;
-            //write the data
-            foreach (asset a in imported_devices.Where(n => !n.found))
-            {
-                ws.Cells[rows, columns++] = a.asset_number;
-                ws.Cells[rows, columns++] = a.missing.ToString();
-                ws.Cells[rows, columns++] = a.iss_division;
-                ws.Cells[rows, columns++] = a.description;
-                ws.Cells[rows, columns++] = a.model;
-                ws.Cells[rows, columns++] = a.asset_type;
-                ws.Cells[rows, columns++] = a.location;
-                ws.Cells[rows, columns++] = a.physical_location;
-                ws.Cells[rows, columns++] = a.room_per_advantage;
-                ws.Cells[rows, columns++] = a.room_per_fats;
-                ws.Cells[rows, columns++] = a.room_number;
-                ws.Cells[rows, columns++] = a.cost;
-                ws.Cells[rows, columns++] = a.last_inv.ToString();
-                ws.Cells[rows, columns++] = a.serial_number;
-                ws.Cells[rows, columns++] = a.master;
-                ws.Cells[rows, columns] = "";
-                foreach (string child in a.children)
-                {
-                    var cellValue = (string)(ws.Cells[rows, columns] as Excel.Range).Value;
-                    ws.Cells[rows, columns] = cellValue + child + ";";
-                }
-                columns++;
-                ws.Cells[rows, columns++] = a.fats_owner;
-                ws.Cells[rows, columns++] = a.notes;
-                ws.Cells[rows, columns++] = a.status;
-                ws.Cells[rows, columns++] = a.device_name;
-                ws.Cells[rows, columns++] = a.mac_address;
-                ws.Cells[rows, columns++] = a.ip_address;
-                ws.Cells[rows, columns++] = a.hostname;
-                ws.Cells[rows, columns++] = a.controller_name;
-                ws.Cells[rows, columns++] = a.firmware;
-                ws.Cells[rows, columns++] = a.contact;
-                ws.Cells[rows, columns++] = a.last_scanned.ToString();
-                ws.Cells[rows++, columns] = a.source;
-                columns = 1;
-            }
-
-            //save the file using the param as the path and name
-            ws.Columns.AutoFit();
-            wb.SaveAs(x);
-            //open the saved file
-
-            open_excel_file(x);
-
-        }
-
-
+        
 
         //this function handles writing the compared data to excel file.
         //calling functions: save button on form.
