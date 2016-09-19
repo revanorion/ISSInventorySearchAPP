@@ -27,7 +27,7 @@ namespace ISSIAS
         public dataViewForm(FileConnections a, char type)
         {
             InitializeComponent();
-            files=a;
+            files=a;          
             switch (type)
             {
                 case 'I':
@@ -37,17 +37,20 @@ namespace ISSIAS
                     assetData.DataSource = files.fb_assets;
                     break;
                 case 'F':
-                    List<asset> found = files.found_devices.Where(n => n.found).ToList();
-                    assetData.DataSource = found;
+                    assetData.DataSource = files.found_devices;
                     break;
                 case 'M':
-                    List<asset> missing = files.imported_devices.Where(n => !n.found).ToList();
-                    assetData.DataSource = missing;
+                    assetData.DataSource = files.missing_devices;
                     break;                
             }           
                
             
             this.assetDataView.DataSource = assetData;
+        }
+
+        private void assetDataView_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
         }      
     }
 }

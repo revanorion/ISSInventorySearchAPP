@@ -10,6 +10,7 @@ using System.Data.OleDb;
 using System.Data;
 using System.Text.RegularExpressions;
 using Microsoft.VisualBasic.FileIO;
+using System.ComponentModel;
 
 namespace ISSISA_Library
 {
@@ -25,9 +26,10 @@ namespace ISSISA_Library
 
         //these lists contain all the assets in the fiscal book, imported files, or assets that were found
         //as a result of comparting the previous two lists
-        public List<asset> fb_assets = new List<asset>();
-        public List<asset> imported_devices = new List<asset>();
-        public List<asset> found_devices = new List<asset>();
+        public BindingList<asset> fb_assets = new BindingList<asset>();
+        public BindingList<asset> imported_devices = new BindingList<asset>();
+        public BindingList<asset> found_devices = new BindingList<asset>();
+        public BindingList<asset> missing_devices = new BindingList<asset>();
 
         //this private member holds the file properties for the fiscal book
         private fileNaming _fiscal_book_address = new fileNaming("No File Selected!");
@@ -642,7 +644,7 @@ namespace ISSISA_Library
 
         //this function handles writing the compared data to excel file.
         //calling functions: save button on form.
-        public void write_to_excel(string x)
+        public void write_to_excel(string x, BindingList<asset> exportList)
         {
             if (xlApp == null)
             {
@@ -692,7 +694,7 @@ namespace ISSISA_Library
 
             columns = 1;
             //write the data
-            foreach (asset a in found_devices.Where(n => n.found))
+            foreach (asset a in exportList)
             {
                 ws.Cells[rows, columns++] = a.asset_number;
                 ws.Cells[rows, columns++] = a.missing.ToString();
@@ -746,33 +748,27 @@ namespace ISSISA_Library
         {
 
             //every asset in fical book is placed in found devices list
-            found_devices = fb_assets.ToList();
+            
+            //found_devices = fb_assets;
 
             //loops through each asset in list
             foreach (asset a in imported_devices)
             {
                 //grab the asset from fiscal book that has matching serials from imported device data
 
-                asset existingAsset = found_devices.FirstOrDefault(x => x.serial_number.Contains(a.serial_number));
+                asset existingAsset = fb_assets.FirstOrDefault(x => x.serial_number.Contains(a.serial_number));
                 if (existingAsset != null)
                 {
-                    updateFoundAsset(existingAsset, a);
-
-                    //foreach (string child in a.children)
-                    //{
-                    //    existingAsset = found_devices.FirstOrDefault(x => x.serial_number.Contains(child));
-                    //    if (existingAsset != null)
-                    //    {
-                    //        updateFoundAsset(existingAsset, a, false);
-                    //        //change the serial number back to the child then change the master sn
-                    //        existingAsset.serial_number = child;
-                    //        existingAsset.master = a.serial_number;                            
-                    //    }
-                    //}
+                    asset found = new asset(existingAsset);
+                    updateFoundAsset(found, a);
+                    found_devices.Add(found);
+                   
                 }
                 else
                 {
                     //doesnt exist
+                    asset missing = new asset(a);
+                    missing_devices.Add(missing);                    
                 }
             }
         }

@@ -42,6 +42,7 @@
             this.assetDataView.Name = "assetDataView";
             this.assetDataView.Size = new System.Drawing.Size(904, 508);
             this.assetDataView.TabIndex = 0;
+            this.assetDataView.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.assetDataView_CellContentClick);
             // 
             // dataViewForm
             // 

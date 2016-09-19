@@ -16,6 +16,7 @@ namespace ISSIAS
     {
 
         private Form IAS_importedDataView;
+        private InventoryForm IAS;
         private Form IAS_FBDataView;
         private Form IAS_foundDataView;
         private Form IAS_missingDataView;
@@ -24,22 +25,40 @@ namespace ISSIAS
         {
             InitializeComponent();
             files = new FileConnections();
+            IAS = new InventoryForm(files);
             IAS_importedDataView = new dataViewForm(files, 'I');
             IAS_FBDataView = new dataViewForm(files, 'B');
             IAS_foundDataView = new dataViewForm(files, 'F');
             IAS_missingDataView = new dataViewForm(files, 'M');
 
+            IAS.MdiParent = this;
             IAS_FBDataView.MdiParent = this;
             IAS_foundDataView.MdiParent = this;
             IAS_missingDataView.MdiParent = this;
             IAS_importedDataView.MdiParent = this;
+
+            foreach (Control ctrl in this.Controls)
+            {
+                if (ctrl is MdiClient)
+                {
+                    ctrl.BackColor = Color.Cornsilk;
+                }
+                else if (ctrl is System.Windows.Forms.PictureBox)
+                {
+                    ctrl.BackColor = Color.Cornsilk;
+                }
+
+            }
         }
 
         private void iASToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
-            InventoryForm IAS = new InventoryForm(files);
-            IAS.MdiParent = this;
+            if (IAS.IsDisposed)
+            {
+                IAS = new InventoryForm(files);
+                IAS.MdiParent = this;
+            }
 
             hideChildren();
             IAS.Show();
@@ -50,15 +69,25 @@ namespace ISSIAS
             Application.Exit();
         }
 
-        
+
         private void viewImportedDevicesToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (IAS_importedDataView.IsDisposed)
+            {
+                IAS_importedDataView = new dataViewForm(files, 'I');
+                IAS_importedDataView.MdiParent = this;
+            }
             hideChildren();
             IAS_importedDataView.Show();
         }
 
         private void viewFBDevicesToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (IAS_FBDataView.IsDisposed)
+            {
+                IAS_FBDataView = new dataViewForm(files, 'B');
+                IAS_FBDataView.MdiParent = this;
+            }
             hideChildren();
             IAS_FBDataView.Show();
         }
@@ -66,15 +95,23 @@ namespace ISSIAS
 
         private void viewFoundtoolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (IAS_foundDataView.IsDisposed)
+            {
+                IAS_foundDataView = new dataViewForm(files, 'F');
+                IAS_foundDataView.MdiParent = this;
+            }
             hideChildren();
             IAS_foundDataView.Show();
         }
 
         private void viewMissingToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            hideChildren();
-            if (IAS_missingDataView == null)
+            if (IAS_missingDataView.IsDisposed)
+            {
                 IAS_missingDataView = new dataViewForm(files, 'M');
+                IAS_missingDataView.MdiParent = this;
+            }
+            hideChildren();
             IAS_missingDataView.Show();
         }
 
