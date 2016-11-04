@@ -11,6 +11,7 @@ using System.Data;
 using System.Text.RegularExpressions;
 using Microsoft.VisualBasic.FileIO;
 using System.ComponentModel;
+using System.Collections;
 
 namespace ISSISA_Library
 {
@@ -30,6 +31,16 @@ namespace ISSISA_Library
         public BindingList<asset> imported_devices = new BindingList<asset>();
         public BindingList<asset> found_devices = new BindingList<asset>();
         public BindingList<asset> missing_devices = new BindingList<asset>();
+
+        public BindingList<asset> locationValidate_devices = new BindingList<asset>();
+        public BindingList<asset> serialValidate_devices = new BindingList<asset>();
+        public BindingList<asset> roomValidate_devices = new BindingList<asset>();
+        public BindingList<asset> locationRoomValidate_devices = new BindingList<asset>();
+        public BindingList<asset> locationSerialValidate_devices = new BindingList<asset>();
+        public BindingList<asset> serialRoomValidate_devices = new BindingList<asset>();
+        public BindingList<asset> locationRoomSerialValidate_devices = new BindingList<asset>();
+
+
 
         //this private member holds the file properties for the fiscal book
         private fileNaming _fiscal_book_address = new fileNaming("No File Selected!");
@@ -80,9 +91,7 @@ namespace ISSISA_Library
                 OleDbDataAdapter myCommand = new OleDbDataAdapter(" SELECT * from [" + sheetName + "$]", con);
                 bool ignore = true;
                 myCommand.Fill(myDataSet);
-                DataTable d;
-                // d = myDataSet.Tables[0];
-                // d.WriteXml("c:\\myxml.xml");
+
                 con.Close();
 
                 //Travers through each row in the dataset
@@ -167,7 +176,7 @@ namespace ISSISA_Library
             if (skipUntil != null)
                 hasSkip = true;
             if (breakAt != null)
-                hasBreak = true;          
+                hasBreak = true;
 
             using (var csvParser = new TextFieldParser(x.path))
             {
@@ -189,14 +198,14 @@ namespace ISSISA_Library
                         asset a = new asset();
                         switch (csvType)
                         {
-                        //Tropos
+                            //Tropos
                             case 'T':
                                 a.serial_number = parts.ElementAt(0);
                                 a.ip_address = parts.ElementAt(1);
                                 a.status = parts.ElementAt(2);
                                 a.physical_location = parts.ElementAt(3);
                                 break;
-                        //Wireless_Controllers
+                            //Wireless_Controllers
                             case 'W':
                                 a.controller_name = parts.ElementAt(0);
                                 a.ip_address = parts.ElementAt(1);
@@ -205,7 +214,7 @@ namespace ISSISA_Library
                                 a.serial_number = parts.ElementAt(4);
                                 a.model = parts.ElementAt(5);
                                 break;
-                        //aps_wireless
+                            //aps_wireless
                             case 'A':
                                 a.device_name = parts.ElementAt(0);
                                 a.mac_address = parts.ElementAt(1);
@@ -215,7 +224,7 @@ namespace ISSISA_Library
                                 a.physical_location = parts.ElementAt(5);
                                 a.controller_name = parts.ElementAt(6);
                                 break;
-                        //device type - UPS
+                            //device type - UPS
                             case 'S':
                                 if (parts.ToArray().Length > 6)
                                     a.serial_number = parts.ElementAt(3).Replace("\"", "");
@@ -229,7 +238,7 @@ namespace ISSISA_Library
                                 a.firmware = parts.ElementAt(4).Replace("\"", "");
                                 a.physical_location = parts.ElementAt(5).Replace("\"", "") + " " + parts.ElementAt(6).Replace("\"", "");
                                 break;
-                        //Brocade switch
+                            //Brocade switch
                             case 'B':
 
                                 serial = parts.ElementAt(6).Replace("\"", "");
@@ -259,7 +268,7 @@ namespace ISSISA_Library
                                     imported_devices.Add(b);
                                 }
                                 break;
-                        //Device List- total-assest
+                            //Device List- total-assest
                             case 'D':
 
                                 a.description = parts.ElementAt(0);
@@ -275,7 +284,7 @@ namespace ISSISA_Library
                                 a.location = parts.ElementAt(10);
 
                                 break;
-                        //UPS yyyy Device List
+                            //UPS yyyy Device List
                             case 'U':
                                 a.model = parts.ElementAt(0);
                                 a.hostname = parts.ElementAt(1);
@@ -287,7 +296,7 @@ namespace ISSISA_Library
                                 a.room_number = parts.ElementAt(7);
                                 a.location = parts.ElementAt(8);
                                 break;
-                        //LMS switch and Router report
+                            //LMS switch and Router report
                             case 'L':
                                 if (parts.ElementAt(0) == "")
                                     continue;
@@ -315,13 +324,13 @@ namespace ISSISA_Library
                                 }
 
                                 break;
-                          //Detailed_Router_Report_-_Yearly_Inventory                        
+                            //Detailed_Router_Report_-_Yearly_Inventory                        
                             case 'R':
                                 a.model = parts.ElementAt(0);
                                 a.device_name = parts.ElementAt(1);
                                 int index = parts.ElementAt(3).IndexOf("RELEASE SOFTWARE");
                                 if (index != -1)
-                                    a.description = parts.ElementAt(3).Substring(0, index-2);
+                                    a.description = parts.ElementAt(3).Substring(0, index - 2);
                                 else
                                     a.description = parts.ElementAt(3);
                                 a.description.Replace(System.Environment.NewLine, "");
@@ -336,11 +345,13 @@ namespace ISSISA_Library
                         if (a.serial_number != "" && csvType != 'B' && csvType != 'L')
                         {
                             imported_devices.Add(a);
-                        }                       
+                        }
                     }
                 }
             }
         }
+
+
 
         //This is going to handle adding a child asset to the device list.
         public void addChild(asset a, string childSN, fileNaming x)
@@ -353,7 +364,7 @@ namespace ISSISA_Library
             b.source = x.name;
             imported_devices.Add(b);
         }
-       
+
 
         public void open_file(fileNaming x)
         {
@@ -367,9 +378,9 @@ namespace ISSISA_Library
                     break;
                 case ".csv":
                     if (x.name.Contains("Tropos"))
-                        open_csv_file(x,'T', "InventorySerialNumber");
+                        open_csv_file(x, 'T', "InventorySerialNumber");
                     else if (x.name.Contains("aps_wireless"))
-                        open_csv_file(x,'A', "AP Name", "Disassociated AP(s)");
+                        open_csv_file(x, 'A', "AP Name", "Disassociated AP(s)");
                     else if (x.name.Contains("Wireless_Controllers"))
                         open_csv_file(x, 'W', "Controller Name");
                     else if (x.name.Contains("Brocade switch"))
@@ -383,7 +394,7 @@ namespace ISSISA_Library
                     else if (x.name.Contains("device type - UPS"))
                         open_csv_file(x, 'S');
                     else if (x.name.Contains("Detailed_Router_Report_-_Yearly_Inventory") || x.name.Contains("Detailed_Switch_Report_-_Yearly_Inventory"))
-                        open_csv_file(x, 'R',"Product Series");                    
+                        open_csv_file(x, 'R', "Product Series");
                     else
                         throw new NotSupportedException();
                     break;
@@ -392,7 +403,7 @@ namespace ISSISA_Library
                     break;
                 default:
                     throw new NotSupportedException();
-            }          
+            }
         }
 
         private void open_xls_file(fileNaming x, string skipUntil = null, string breakAt = null)
@@ -545,7 +556,7 @@ namespace ISSISA_Library
                 sr.Close();
             }
         }
-        
+
 
         //this function handles writing the compared data to excel file.
         //calling functions: save button on form.
@@ -653,7 +664,7 @@ namespace ISSISA_Library
         {
 
             //every asset in fical book is placed in found devices list
-            
+
             //found_devices = fb_assets;
 
             //loops through each asset in list
@@ -667,13 +678,13 @@ namespace ISSISA_Library
                     asset found = new asset(existingAsset);
                     updateFoundAsset(found, a);
                     found_devices.Add(found);
-                   
+
                 }
                 else
                 {
                     //doesnt exist
                     asset missing = new asset(a);
-                    missing_devices.Add(missing);                    
+                    missing_devices.Add(missing);
                 }
             }
         }
@@ -735,8 +746,22 @@ namespace ISSISA_Library
             return 1;
         }
 
+        //This clears all list data.
+        //calling functions: run button on form -> run_button_Click 
+        public void clear_data()
+        {
+            imported_devices.Clear();
+            fb_assets.Clear();
+            finished_files.Clear();
+            found_devices.Clear();
+            missing_devices.Clear();
+            locationValidate_devices.Clear();
+            serialValidate_devices.Clear();
+            roomValidate_devices.Clear();
+        }
+
         //this function makes the necessay calls to import all data from selected files the compare the data
-        //calling functions: run button on form.
+        //calling functions: run button on form -> run_button_Click
         public void import_data()
         {
             //open fiscal book first
@@ -752,11 +777,250 @@ namespace ISSISA_Library
             compare();
             //get the current date
             string date = DateTime.Now.ToString("yyyyMMdd");
-            
+
             //add report to finished files list
             finished_files.Add(new fileNaming(date + " Inventory Report "));
             finished_files.Add(new fileNaming(date + " Missing Inventory Report "));
         }
+
+
+        //this function makes the necessay calls to import the data only from the inventory review file
+        //calling functions: run button on form ->run_button_Click
+        public void import_review_data()
+        {
+            open_review_book();
+
+
+
+            //then validate the data
+            validate();
+            //get the current date
+            string date = DateTime.Now.ToString("yyyyMMdd");
+
+            //add report to finished files list
+            finished_files.Add(new fileNaming(date + " Inventory Report "));
+        }
+
+        private void open_review_book()
+        {
+            string sheetName = "Advantage_FATS";
+            OleDbConnection con = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + _fiscal_book_address.path + ";Extended Properties=\"Excel 12.0 Xml;HDR=NO;IMEX=1;\"");
+            con.Open();
+
+            try
+            {
+                //Create Dataset and fill with imformation from the Excel Spreadsheet for easier reference
+                DataSet myDataSet = new DataSet();
+                OleDbDataAdapter myCommand = new OleDbDataAdapter(" SELECT * from [" + sheetName + "$]", con);
+                bool ignore = true;
+                myCommand.Fill(myDataSet);
+                con.Close();
+
+                //Travers through each row in the dataset
+                foreach (DataRow myDataRow in myDataSet.Tables[0].Rows)
+                {
+                    //Stores info in Datarow into an array
+                    Object[] cells = myDataRow.ItemArray;
+                    //Traverse through each array and put into object cellContent as type Object
+                    //Using Object as for some reason the Dataset reads some blank value which
+                    //causes a hissy fit when trying to read. By using object I can convert to
+                    //String at a later point.
+                    var result = cells.Where(n => n.ToString() == "ASSET_NUMBER").ToList();
+                    if (result.Count == 0 && ignore)
+                        continue;
+                    else if (ignore)
+                        ignore = false;
+                    else
+                    {
+                        asset b = new asset(cells[0],
+                            cells[2],
+                            cells[4],
+                            cells[6],
+                            cells[7],
+                            cells[8],
+                            cells[11],
+                            cells[15],
+                            cells[17],
+                            cells[18],
+                            cells[19],
+                            cells[20],
+                            cells[22],
+                            cells[23]);
+                        fb_assets.Add(b);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                con.Close();
+            }
+        }
+
+        private void validate()
+        {
+            locationValidate_devices = new BindingList<asset>(
+                fb_assets.Where(a => !a.location.Equals(a.physical_location))
+                .ToList());
+            serialValidate_devices = new BindingList<asset>(
+                fb_assets.Where(a => !(a.serial_number == "" && (a.fats_serial_number == "#N/A" || a.fats_serial_number == "")))
+                .Where(a => !Convert.ToString(a.serial_number).Equals(a.fats_serial_number))
+                .ToList());
+            roomValidate_devices = new BindingList<asset>(
+                fb_assets
+                .Where(a => !(a.room_per_advantage == "" && (a.room_per_fats == "#N/A" || a.room_per_fats == "")))
+                .Where(a => !a.room_per_advantage.Equals(a.room_per_fats))
+                .ToList());
+            locationRoomValidate_devices = new BindingList<asset>((from loc in locationValidate_devices
+                                                                   join room in roomValidate_devices on loc.asset_number equals room.asset_number
+                                                                   select loc).ToList());
+            locationSerialValidate_devices = new BindingList<asset>((from loc in locationValidate_devices
+                                                                     join serial in serialValidate_devices on loc.asset_number equals serial.asset_number
+                                                                     select loc).ToList());
+            serialRoomValidate_devices = new BindingList<asset>((from serial in serialValidate_devices
+                                                                 join room in roomValidate_devices on serial.asset_number equals room.asset_number
+                                                                 select serial).ToList());
+            locationRoomSerialValidate_devices = new BindingList<asset>((from locRoom in locationRoomValidate_devices
+                                                                         join serialRoom in serialRoomValidate_devices on locRoom.asset_number equals serialRoom.asset_number
+                                                                         select locRoom).ToList());
+
+            locationValidate_devices = new BindingList<asset>(locationValidate_devices.Except(locationRoomValidate_devices, new ISSIAS_Library.assetEqualityComparer()).ToList());
+            locationValidate_devices = new BindingList<asset>(locationValidate_devices.Except(locationSerialValidate_devices, new ISSIAS_Library.assetEqualityComparer()).ToList());
+
+            serialValidate_devices = new BindingList<asset>(serialValidate_devices.Except(serialRoomValidate_devices, new ISSIAS_Library.assetEqualityComparer()).ToList());
+
+            //ALL serialValidates are in locationSerial due to all records being included
+            //serialValidate_devices = new BindingList<asset>(serialValidate_devices.Except(locationSerialValidate_devices, new ISSIAS_Library.assetEqualityComparer()).ToList());
+
+            roomValidate_devices = new BindingList<asset>(roomValidate_devices.Except(serialRoomValidate_devices, new ISSIAS_Library.assetEqualityComparer()).ToList());
+            //roomValidate_devices = new BindingList<asset>(roomValidate_devices.Except(locationRoomValidate_devices, new ISSIAS_Library.assetEqualityComparer()).ToList());
+
+        }
+
+        //this function handles writing the compared data to excel file.
+        //calling functions: save button on form.
+        public void write_validate_to_excel(string x)
+        {
+            ICollection<KeyValuePair<string, BindingList<asset>>> worksheets = new Dictionary<string, BindingList<asset>>();
+            worksheets.Add(new KeyValuePair<string, BindingList<asset>>("Locations", locationValidate_devices));
+            worksheets.Add(new KeyValuePair<string, BindingList<asset>>("Serials", serialValidate_devices));
+            worksheets.Add(new KeyValuePair<string, BindingList<asset>>("Rooms", roomValidate_devices));
+            worksheets.Add(new KeyValuePair<string, BindingList<asset>>("Locations & Rooms", locationRoomValidate_devices));
+            worksheets.Add(new KeyValuePair<string, BindingList<asset>>("Locations & Serials", locationSerialValidate_devices));
+            worksheets.Add(new KeyValuePair<string, BindingList<asset>>("Serials & Rooms", serialRoomValidate_devices));
+            worksheets.Add(new KeyValuePair<string, BindingList<asset>>("Locations & Rooms & Serials", locationRoomSerialValidate_devices));
+
+            if (xlApp == null)
+            {
+                Console.WriteLine("EXCEL could not be started. Check that your office installation and project references are correct.");
+                return;
+            }
+            xlApp.Visible = false;
+            Excel.Workbook wb = xlApp.Workbooks.Add(Excel.XlWBATemplate.xlWBATWorksheet);
+
+
+            foreach (KeyValuePair<string, BindingList<asset>> worksheet in worksheets)
+            {
+
+                //Excel.Worksheet ws = (Excel.Worksheet)wb.Worksheets[worksheet.Key];
+                Excel.Worksheet ws;
+                if (wb.Sheets.Count == 0)
+                    ws = wb.Sheets.Add();
+                else
+                    ws = wb.Sheets.Add(After: wb.Sheets[wb.Sheets.Count]);
+                ws.Name = worksheet.Key;
+                if (ws == null)
+                {
+                    Console.WriteLine("Worksheet could not be created. Check that your office installation and project references are correct.");
+                }
+                int rows = 1, columns = 1;
+
+                //write the headers           
+
+                ws.Cells[rows, columns++] = "Asset #";
+                ws.Cells[rows, columns++] = "Missing " + fiscal_book_address.Substring(3, 4);
+                ws.Cells[rows, columns++] = "ISS Divison";
+                ws.Cells[rows, columns++] = "Description";
+                ws.Cells[rows, columns++] = "Model";
+                ws.Cells[rows, columns++] = "Asset Type";
+                ws.Cells[rows, columns++] = "Location";
+                ws.Cells[rows, columns++] = "Physical Location";
+                ws.Cells[rows, columns++] = "Room Per Advantage #";
+                ws.Cells[rows, columns++] = "Room Per FATS";
+                ws.Cells[rows, columns++] = "Room Number";
+                ws.Cells[rows, columns++] = "Cost";
+                ws.Cells[rows, columns++] = "Last Inv";
+                ws.Cells[rows, columns++] = "Serial #";
+                ws.Cells[rows, columns++] = "Master SN";
+                ws.Cells[rows, columns++] = "Children SN";
+                ws.Cells[rows, columns++] = "FATS Owner";
+                ws.Cells[rows, columns++] = "Notes";
+                ws.Cells[rows, columns++] = "Status";
+                ws.Cells[rows, columns++] = "Device Name";
+                ws.Cells[rows, columns++] = "Mac Address";
+                ws.Cells[rows, columns++] = "IP Address";
+                ws.Cells[rows, columns++] = "Hostname";
+                ws.Cells[rows, columns++] = "Controller Name";
+                ws.Cells[rows, columns++] = "Firmware";
+                ws.Cells[rows, columns++] = "Contact";
+                ws.Cells[rows, columns++] = "Last Scanned";
+                ws.Cells[rows++, columns] = "Source";
+
+                columns = 1;
+                //write the data
+                foreach (asset a in worksheet.Value)
+                {
+                    ws.Cells[rows, columns++] = a.asset_number;
+                    ws.Cells[rows, columns++] = a.missing.ToString();
+                    ws.Cells[rows, columns++] = a.iss_division;
+                    ws.Cells[rows, columns++] = a.description;
+                    ws.Cells[rows, columns++] = a.model;
+                    ws.Cells[rows, columns++] = a.asset_type;
+                    ws.Cells[rows, columns++] = a.location;
+                    ws.Cells[rows, columns++] = a.physical_location;
+                    ws.Cells[rows, columns++] = a.room_per_advantage;
+                    ws.Cells[rows, columns++] = a.room_per_fats;
+                    ws.Cells[rows, columns++] = a.room_number;
+                    ws.Cells[rows, columns++] = a.cost;
+                    ws.Cells[rows, columns++] = a.last_inv.ToString();
+                    ws.Cells[rows, columns++] = a.serial_number;
+                    ws.Cells[rows, columns++] = a.master;
+                    ws.Cells[rows, columns] = "";
+                    foreach (string child in a.children)
+                    {
+                        var cellValue = (string)(ws.Cells[rows, columns] as Excel.Range).Value;
+                        ws.Cells[rows, columns] = cellValue + child + ";";
+                    }
+                    columns++;
+                    ws.Cells[rows, columns++] = a.fats_owner;
+                    ws.Cells[rows, columns++] = a.notes;
+                    ws.Cells[rows, columns++] = a.status;
+                    ws.Cells[rows, columns++] = a.device_name;
+                    ws.Cells[rows, columns++] = a.mac_address;
+                    ws.Cells[rows, columns++] = a.ip_address;
+                    ws.Cells[rows, columns++] = a.hostname;
+                    ws.Cells[rows, columns++] = a.controller_name;
+                    ws.Cells[rows, columns++] = a.firmware;
+                    ws.Cells[rows, columns++] = a.contact;
+                    ws.Cells[rows, columns++] = a.last_scanned;
+                    ws.Cells[rows++, columns] = a.source;
+                    columns = 1;
+                }
+
+                //save the file using the param as the path and name
+                ws.Columns.AutoFit();
+
+            }
+            wb.SaveAs(x);
+
+            //open the saved file
+
+            open_excel_file(x);
+        }
+
 
         //calling functions: write_to_excel
         //this funciton is to open the file that is at path x

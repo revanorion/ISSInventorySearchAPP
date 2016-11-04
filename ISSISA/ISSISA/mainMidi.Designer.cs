@@ -39,6 +39,9 @@
             this.viewFBDevicesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewFoundToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewMissingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewLocationValidateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewSerialValidateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewRoomValidateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip2.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -64,7 +67,7 @@
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(92, 22);
             this.toolStripMenuItem3.Text = "Exit";
             this.toolStripMenuItem3.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -80,7 +83,7 @@
             // toolStripMenuItem5
             // 
             this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-            this.toolStripMenuItem5.Size = new System.Drawing.Size(126, 22);
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem5.Text = "IAS";
             this.toolStripMenuItem5.Click += new System.EventHandler(this.iASToolStripMenuItem_Click);
             // 
@@ -90,38 +93,62 @@
             this.toolStripMenuItem6,
             this.viewFBDevicesToolStripMenuItem,
             this.viewFoundToolStripMenuItem,
-            this.viewMissingToolStripMenuItem});
+            this.viewMissingToolStripMenuItem,
+            this.viewLocationValidateToolStripMenuItem,
+            this.viewSerialValidateToolStripMenuItem,
+            this.viewRoomValidateToolStripMenuItem});
             this.viewDataToolStripMenuItem.Name = "viewDataToolStripMenuItem";
-            this.viewDataToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
+            this.viewDataToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.viewDataToolStripMenuItem.Text = "View Data";
             // 
             // toolStripMenuItem6
             // 
             this.toolStripMenuItem6.Name = "toolStripMenuItem6";
-            this.toolStripMenuItem6.Size = new System.Drawing.Size(194, 22);
+            this.toolStripMenuItem6.Size = new System.Drawing.Size(205, 22);
             this.toolStripMenuItem6.Text = "View Imported Devices";
             this.toolStripMenuItem6.Click += new System.EventHandler(this.viewImportedDevicesToolStripMenuItem_Click);
             // 
             // viewFBDevicesToolStripMenuItem
             // 
             this.viewFBDevicesToolStripMenuItem.Name = "viewFBDevicesToolStripMenuItem";
-            this.viewFBDevicesToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.viewFBDevicesToolStripMenuItem.Size = new System.Drawing.Size(205, 22);
             this.viewFBDevicesToolStripMenuItem.Text = "View FB Devices";
             this.viewFBDevicesToolStripMenuItem.Click += new System.EventHandler(this.viewFBDevicesToolStripMenuItem_Click);
             // 
             // viewFoundToolStripMenuItem
             // 
             this.viewFoundToolStripMenuItem.Name = "viewFoundToolStripMenuItem";
-            this.viewFoundToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.viewFoundToolStripMenuItem.Size = new System.Drawing.Size(205, 22);
             this.viewFoundToolStripMenuItem.Text = "View Found";
             this.viewFoundToolStripMenuItem.Click += new System.EventHandler(this.viewFoundtoolStripMenuItem_Click);
             // 
             // viewMissingToolStripMenuItem
             // 
             this.viewMissingToolStripMenuItem.Name = "viewMissingToolStripMenuItem";
-            this.viewMissingToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.viewMissingToolStripMenuItem.Size = new System.Drawing.Size(205, 22);
             this.viewMissingToolStripMenuItem.Text = "View Missing";
             this.viewMissingToolStripMenuItem.Click += new System.EventHandler(this.viewMissingToolStripMenuItem_Click);
+            // 
+            // viewLocationValidateToolStripMenuItem
+            // 
+            this.viewLocationValidateToolStripMenuItem.Name = "viewLocationValidateToolStripMenuItem";
+            this.viewLocationValidateToolStripMenuItem.Size = new System.Drawing.Size(205, 22);
+            this.viewLocationValidateToolStripMenuItem.Text = "View Validated Locations";
+            this.viewLocationValidateToolStripMenuItem.Click += new System.EventHandler(this.viewLocationValidateToolStripMenuItem_Click);
+            // 
+            // viewSerialValidateToolStripMenuItem
+            // 
+            this.viewSerialValidateToolStripMenuItem.Name = "viewSerialValidateToolStripMenuItem";
+            this.viewSerialValidateToolStripMenuItem.Size = new System.Drawing.Size(205, 22);
+            this.viewSerialValidateToolStripMenuItem.Text = "View Validated Serials";
+            this.viewSerialValidateToolStripMenuItem.Click += new System.EventHandler(this.viewSerialValidateToolStripMenuItem_Click);
+            // 
+            // viewRoomValidateToolStripMenuItem
+            // 
+            this.viewRoomValidateToolStripMenuItem.Name = "viewRoomValidateToolStripMenuItem";
+            this.viewRoomValidateToolStripMenuItem.Size = new System.Drawing.Size(205, 22);
+            this.viewRoomValidateToolStripMenuItem.Text = "View Validated Rooms";
+            this.viewRoomValidateToolStripMenuItem.Click += new System.EventHandler(this.viewRoomValidateToolStripMenuItem_Click);
             // 
             // mainMidi
             // 
@@ -163,5 +190,8 @@
         private System.Windows.Forms.ToolStripMenuItem viewFBDevicesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewFoundToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewMissingToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewLocationValidateToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewSerialValidateToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewRoomValidateToolStripMenuItem;
     }
 }
