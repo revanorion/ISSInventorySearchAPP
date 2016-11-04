@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="asset.cs" />
+    <Compile Include="assetEqualityComparer.cs" />
     <Compile Include="FileConnections.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

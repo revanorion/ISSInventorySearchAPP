@@ -15,11 +15,17 @@ namespace ISSIAS
     public partial class mainMidi : Form
     {
 
-        private Form IAS_importedDataView;
+        private dataViewForm IAS_importedDataView;
         private InventoryForm IAS;
-        private Form IAS_FBDataView;
-        private Form IAS_foundDataView;
-        private Form IAS_missingDataView;
+        private dataViewForm IAS_FBDataView;
+        private dataViewForm IAS_foundDataView;
+        private dataViewForm IAS_missingDataView;
+
+        private dataViewForm IAS_locationValidateDataView;
+        private dataViewForm IAS_serialValidateDataView;
+        private dataViewForm IAS_roomValidateDataView;
+
+
         private FileConnections files;
         public mainMidi()
         {
@@ -30,12 +36,18 @@ namespace ISSIAS
             IAS_FBDataView = new dataViewForm(files, 'B');
             IAS_foundDataView = new dataViewForm(files, 'F');
             IAS_missingDataView = new dataViewForm(files, 'M');
+            IAS_locationValidateDataView = new dataViewForm(files, 'L');
+            IAS_serialValidateDataView = new dataViewForm(files, 'S');
+            IAS_roomValidateDataView = new dataViewForm(files, 'R');
 
             IAS.MdiParent = this;
             IAS_FBDataView.MdiParent = this;
             IAS_foundDataView.MdiParent = this;
             IAS_missingDataView.MdiParent = this;
             IAS_importedDataView.MdiParent = this;
+            IAS_locationValidateDataView.MdiParent = this;
+            IAS_serialValidateDataView.MdiParent = this;
+            IAS_roomValidateDataView.MdiParent = this;
 
             foreach (Control ctrl in this.Controls)
             {
@@ -113,6 +125,43 @@ namespace ISSIAS
             }
             hideChildren();
             IAS_missingDataView.Show();
+        }
+
+
+        private void viewLocationValidateToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (IAS_locationValidateDataView.IsDisposed)
+            {
+                IAS_locationValidateDataView = new dataViewForm(files, 'L');
+                IAS_locationValidateDataView.MdiParent = this;
+            }
+            hideChildren();
+            IAS_locationValidateDataView.refresh(files.locationValidate_devices);
+            IAS_locationValidateDataView.Show();
+
+        }
+        private void viewSerialValidateToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (IAS_serialValidateDataView.IsDisposed)
+            {
+                IAS_serialValidateDataView = new dataViewForm(files, 'S');
+                IAS_serialValidateDataView.MdiParent = this;
+            }
+            hideChildren();
+            IAS_serialValidateDataView.refresh(files.serialValidate_devices);
+            IAS_serialValidateDataView.Show();
+        }
+        private void viewRoomValidateToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            if (IAS_roomValidateDataView.IsDisposed)
+            {
+                IAS_roomValidateDataView = new dataViewForm(files, 'R');
+                IAS_roomValidateDataView.MdiParent = this;
+            }
+            hideChildren();            
+            IAS_roomValidateDataView.refresh(files.roomValidate_devices);
+            IAS_roomValidateDataView.Show();
         }
 
 

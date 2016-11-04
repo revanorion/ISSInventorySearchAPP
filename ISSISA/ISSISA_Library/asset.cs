@@ -5,15 +5,16 @@ using System.Text.RegularExpressions;
 namespace ISSISA_Library
 {
     public class asset
-    {      
+    {
 
         //Properties found in Fiscal Book
         public string asset_number { get; set; }
         public DateTime missing { get; set; }
         public double cost { get; set; }
         public DateTime last_inv { get; set; }
-        
+
         public string serial_number { get; set; }
+        public string fats_serial_number { get; set; }
         public string description { get; set; }
         public string iss_division { get; set; }
         public string model { get; set; }
@@ -48,6 +49,9 @@ namespace ISSISA_Library
             cost = 0.0;
             last_inv = DateTime.Now;
             serial_number = "";
+            fats_serial_number = "";
+            firmware = "";
+            hostname = "";
             description = "";
             iss_division = "";
             model = "";
@@ -119,11 +123,53 @@ namespace ISSISA_Library
             found = false;
             children = new List<string>();
         }
+        //This constructor is used when getting data from an excel .xlsx review book
+        public asset(object asset_number, object description, object model, object location,
+            object serial_number, object room_per_advantage, object asset_type, object fats_serial_number,
+            object fats_owner, object physical_location, object room_per_fats, object last_inv,
+            object hostname, object ip_address): this()
+        {
+            
+            //Make sure the object params are not null then convert them into specified data type
+            if (asset_number != Convert.DBNull)
+                this.asset_number = Convert.ToString(asset_number);
+            if (description != Convert.DBNull)
+                this.description = Convert.ToString(description);
+            if (model != Convert.DBNull)
+                this.model = Convert.ToString(model);
+            if (asset_type != Convert.DBNull)
+                this.asset_type = Convert.ToString(asset_type);
+            if (location != Convert.DBNull)
+                this.location = Convert.ToString(location).Trim(' ');
+            if (physical_location != Convert.DBNull)
+                this.physical_location = Convert.ToString(physical_location).Trim(' ');
+            if (room_per_advantage != Convert.DBNull)
+                this.room_per_advantage = Convert.ToString(room_per_advantage).Trim(' ');
+            if (room_per_fats != Convert.DBNull)
+                this.room_per_fats = Convert.ToString(room_per_fats).Trim(' ');
+            //Remove all characters for cost that would stop the process to convert to number
 
+            DateTime dateValue;
+            DateTime.TryParse(Convert.ToString(last_inv), out dateValue);
+
+            this.last_inv = dateValue;
+            if (serial_number != Convert.DBNull)
+                this.serial_number = Convert.ToString(serial_number).Trim(' ');
+            if (fats_serial_number != Convert.DBNull)
+                this.fats_serial_number = Convert.ToString(fats_serial_number).Trim(' ');
+            if (fats_owner != Convert.DBNull)
+                this.fats_owner = Convert.ToString(fats_owner);
+            if (hostname != Convert.DBNull)
+                this.hostname = Convert.ToString(hostname);
+            if (ip_address != Convert.DBNull)
+                this.ip_address = Convert.ToString(ip_address);
+            found = false;
+            children = new List<string>();
+        }
         public asset(asset a)
-        {        
+        {
             asset_number = a.asset_number;
-            missing =a.missing;
+            missing = a.missing;
             cost = a.cost;
             last_inv = a.last_inv;
             serial_number = a.serial_number;
@@ -192,6 +238,6 @@ namespace ISSISA_Library
 
         }
 
-       
+
     }
 }

@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ISSISA")]
+[assembly: AssemblyTitle("IAS")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Palm Beach County")]
-[assembly: AssemblyProduct("ISSISA")]
+[assembly: AssemblyProduct("IAS Inventory Asset Search")]
 [assembly: AssemblyCopyright("Copyright © Palm Beach County 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

@@ -21,7 +21,7 @@ namespace ISSIAS
             InitializeComponent();
             this.assetDataView.DataSource = assetData;
         }
-
+      
         //the switch will bind data to appropreate asset list. I for imported devices, B for Fiscal Book, 
         //F for found devices, M for missing devices.
         public dataViewForm(FileConnections a, char type)
@@ -41,16 +41,34 @@ namespace ISSIAS
                     break;
                 case 'M':
                     assetData.DataSource = files.missing_devices;
-                    break;                
-            }           
-               
-            
+                    break;
+                case 'L':
+                    assetData.DataSource = files.locationValidate_devices;
+                    break;
+                case 'S':
+                    assetData.DataSource = files.serialValidate_devices;
+                    break;
+                case 'R':
+                    assetData.DataSource = files.roomValidate_devices;
+                    break;
+            }
+
+
             this.assetDataView.DataSource = assetData;
         }
 
         private void assetDataView_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
 
-        }      
+        }
+
+        public void refresh(BindingList<asset> assetData)
+        {
+            this.assetDataView.DataSource = null;
+            this.assetDataView.Update();
+            this.assetDataView.Refresh();
+            this.assetData.DataSource = assetData;
+            this.assetDataView.DataSource = assetData;
+        }
     }
 }

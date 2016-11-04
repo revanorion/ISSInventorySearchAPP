@@ -162,16 +162,27 @@ namespace ISSISA
         //event handeler for remove run button. will import all data from files list and fiscal book then compare the sets
         private void run_button_Click(object sender, EventArgs e)
         {
+            files.clear_data();
             Cursor.Current = Cursors.WaitCursor;
             if (files.files.Count >= 1 && files.fiscal_book_address != "No File Selected!")
             {
                 //at some point have it check to see if a specific serial exists rather than deleting lists. reimport handeling
-                files.imported_devices.Clear();
-                files.fb_assets.Clear();
-                files.finished_files.Clear();
+
                 try
                 {
                     files.import_data();
+                    finishedFilesBinding.ResetBindings(false);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Don't have open the files selected! \n" + ex.Message);
+                }
+            }
+            else if (files.fiscal_book_address.Contains("Inventory Review"))
+            {
+                try
+                {
+                    files.import_review_data();
                     finishedFilesBinding.ResetBindings(false);
                 }
                 catch (Exception ex)
@@ -202,11 +213,31 @@ namespace ISSISA
             This needs a dialog for saving missing files
 
             */
-            
+
             Cursor.Current = Cursors.WaitCursor;
             sfd.Filter = "Excel Files (.xlsx)|*.xlsx|All Files (*.*)|*.*";
             sfd.FilterIndex = 1;
-            if (files.found_devices != null)
+            if (files.fiscal_book_address.Contains("Inventory Review"))
+            {
+                Cursor.Current = Cursors.WaitCursor;
+                sfd.Filter = "Excel Files (.xlsx)|*.xlsx|All Files (*.*)|*.*";
+                sfd.FilterIndex = 1;
+                //This save Process is for found devices
+                sfd.FileName = files.finished_files[0].name;
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        files.write_validate_to_excel(sfd.FileName);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+
+                }
+            }
+            else if (files.found_devices != null)
             {
                 //This save Process is for found devices
                 sfd.FileName = files.finished_files[0].name;
@@ -237,6 +268,7 @@ namespace ISSISA
                     }
                 }
             }
+
             else
             {
                 MessageBox.Show("No process ran or no devices found!");
