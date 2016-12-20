@@ -941,41 +941,41 @@ namespace ISSISA_Library
                 //write the headers           
 
                 ws.Cells[rows, columns++] = "Asset #";
-                ws.Cells[rows, columns++] = "Missing " + fiscal_book_address.Substring(3, 4);
-                ws.Cells[rows, columns++] = "ISS Divison";
+                //ws.Cells[rows, columns++] = "Missing " + fiscal_book_address.Substring(3, 4);
+                //ws.Cells[rows, columns++] = "ISS Divison";
                 ws.Cells[rows, columns++] = "Description";
                 ws.Cells[rows, columns++] = "Model";
                 ws.Cells[rows, columns++] = "Asset Type";
-                ws.Cells[rows, columns++] = "Location";
-                ws.Cells[rows, columns++] = "Physical Location";
+                ws.Cells[rows, columns++] = "Advantage Location";
+                ws.Cells[rows, columns++] = "FATS Location";
                 ws.Cells[rows, columns++] = "Room Per Advantage #";
                 ws.Cells[rows, columns++] = "Room Per FATS";
-                ws.Cells[rows, columns++] = "Room Number";
-                ws.Cells[rows, columns++] = "Cost";
-                ws.Cells[rows, columns++] = "Last Inv";
-                ws.Cells[rows, columns++] = "Serial #";
-                ws.Cells[rows, columns++] = "Master SN";
-                ws.Cells[rows, columns++] = "Children SN";
+                //ws.Cells[rows, columns++] = "Room Number";
+                //ws.Cells[rows, columns++] = "Cost";
+                //ws.Cells[rows, columns++] = "Last Inv";
+                ws.Cells[rows, columns++] = "Advantage Serial #";
+                ws.Cells[rows, columns++] = "FATS Serial #";
+                //ws.Cells[rows, columns++] = "Children SN";
                 ws.Cells[rows, columns++] = "FATS Owner";
-                ws.Cells[rows, columns++] = "Notes";
-                ws.Cells[rows, columns++] = "Status";
-                ws.Cells[rows, columns++] = "Device Name";
-                ws.Cells[rows, columns++] = "Mac Address";
+                //ws.Cells[rows, columns++] = "Notes";
+                //ws.Cells[rows, columns++] = "Status";
+                //ws.Cells[rows, columns++] = "Device Name";
+                //ws.Cells[rows, columns++] = "Mac Address";
                 ws.Cells[rows, columns++] = "IP Address";
-                ws.Cells[rows, columns++] = "Hostname";
-                ws.Cells[rows, columns++] = "Controller Name";
-                ws.Cells[rows, columns++] = "Firmware";
-                ws.Cells[rows, columns++] = "Contact";
-                ws.Cells[rows, columns++] = "Last Scanned";
-                ws.Cells[rows++, columns] = "Source";
+                ws.Cells[rows++, columns] = "Hostname";
+                //ws.Cells[rows, columns++] = "Controller Name";
+                //ws.Cells[rows, columns++] = "Firmware";
+                //ws.Cells[rows, columns++] = "Contact";
+                //ws.Cells[rows, columns++] = "Last Scanned";
+                //ws.Cells[rows++, columns] = "Source";
 
                 columns = 1;
                 //write the data
                 foreach (asset a in worksheet.Value)
                 {
                     ws.Cells[rows, columns++] = a.asset_number;
-                    ws.Cells[rows, columns++] = a.missing.ToString();
-                    ws.Cells[rows, columns++] = a.iss_division;
+                    //ws.Cells[rows, columns++] = a.missing.ToString();
+                    //ws.Cells[rows, columns++] = a.iss_division;
                     ws.Cells[rows, columns++] = a.description;
                     ws.Cells[rows, columns++] = a.model;
                     ws.Cells[rows, columns++] = a.asset_type;
@@ -983,30 +983,30 @@ namespace ISSISA_Library
                     ws.Cells[rows, columns++] = a.physical_location;
                     ws.Cells[rows, columns++] = a.room_per_advantage;
                     ws.Cells[rows, columns++] = a.room_per_fats;
-                    ws.Cells[rows, columns++] = a.room_number;
-                    ws.Cells[rows, columns++] = a.cost;
-                    ws.Cells[rows, columns++] = a.last_inv.ToString();
+                    //ws.Cells[rows, columns++] = a.room_number;
+                    //ws.Cells[rows, columns++] = a.cost;
+                    //ws.Cells[rows, columns++] = a.last_inv.ToString();
                     ws.Cells[rows, columns++] = a.serial_number;
-                    ws.Cells[rows, columns++] = a.master;
-                    ws.Cells[rows, columns] = "";
-                    foreach (string child in a.children)
-                    {
-                        var cellValue = (string)(ws.Cells[rows, columns] as Excel.Range).Value;
-                        ws.Cells[rows, columns] = cellValue + child + ";";
-                    }
-                    columns++;
+                    ws.Cells[rows, columns++] = a.fats_serial_number;
+                    //ws.Cells[rows, columns] = "";
+                    //foreach (string child in a.children)
+                    //{
+                    //    var cellValue = (string)(ws.Cells[rows, columns] as Excel.Range).Value;
+                    //    ws.Cells[rows, columns] = cellValue + child + ";";
+                    //}
+                    //columns++;
                     ws.Cells[rows, columns++] = a.fats_owner;
-                    ws.Cells[rows, columns++] = a.notes;
-                    ws.Cells[rows, columns++] = a.status;
-                    ws.Cells[rows, columns++] = a.device_name;
-                    ws.Cells[rows, columns++] = a.mac_address;
+                    //ws.Cells[rows, columns++] = a.notes;
+                    //ws.Cells[rows, columns++] = a.status;
+                    //ws.Cells[rows, columns++] = a.device_name;
+                    //ws.Cells[rows, columns++] = a.mac_address;
                     ws.Cells[rows, columns++] = a.ip_address;
-                    ws.Cells[rows, columns++] = a.hostname;
-                    ws.Cells[rows, columns++] = a.controller_name;
-                    ws.Cells[rows, columns++] = a.firmware;
-                    ws.Cells[rows, columns++] = a.contact;
-                    ws.Cells[rows, columns++] = a.last_scanned;
-                    ws.Cells[rows++, columns] = a.source;
+                    ws.Cells[rows++, columns] = a.hostname;
+                    //ws.Cells[rows, columns++] = a.controller_name;
+                    //ws.Cells[rows, columns++] = a.firmware;
+                    //ws.Cells[rows, columns++] = a.contact;
+                    //ws.Cells[rows, columns++] = a.last_scanned;
+                    //ws.Cells[rows++, columns] = a.source;
                     columns = 1;
                 }
 
