@@ -125,7 +125,10 @@ namespace ISSISA_Library
                             cells[12],
                             cells[13],
                             cells[14]);
-                        fb_assets.Add(b);
+                        if (b.serial_number == null)
+                            missing_devices.Add(b);
+                        else
+                            fb_assets.Add(b);
                     }
                 }
             }
@@ -296,6 +299,13 @@ namespace ISSISA_Library
                                 a.room_number = parts.ElementAt(7);
                                 a.location = parts.ElementAt(8);
                                 break;
+                            //GBIC Transceiver Report
+                            case 'G':
+                                a.ip_address = parts.ElementAt(0);
+                                a.device_name = parts.ElementAt(1);
+                                a.description = parts.ElementAt(2);
+                                a.serial_number = parts.ElementAt(5);
+                                break;
                             //LMS switch and Router report
                             case 'L':
                                 if (parts.ElementAt(0) == "")
@@ -395,11 +405,16 @@ namespace ISSISA_Library
                         open_csv_file(x, 'S');
                     else if (x.name.Contains("Detailed_Router_Report_-_Yearly_Inventory") || x.name.Contains("Detailed_Switch_Report_-_Yearly_Inventory"))
                         open_csv_file(x, 'R', "Product Series");
+                    else if (x.name.Contains("GBIC_Transceiver"))
+                        open_csv_file(x, 'G', "DeviceIP Address");
                     else
                         throw new NotSupportedException();
                     break;
                 case ".txt":
-                    open_text_dump(x);
+                    if (x.name.Contains("Brocade transceivers"))
+                        open_brocade_text(x);
+                    else if (x.name.Contains("Cisco Dump"))
+                        open_text_dump(x);
                     break;
                 default:
                     throw new NotSupportedException();
@@ -557,7 +572,57 @@ namespace ISSISA_Library
             }
         }
 
+        private void open_brocade_text(fileNaming x)
+        {
+            string line = "";
 
+
+            using (StreamReader sr = new StreamReader(x.path))
+            {
+                List<string> lines = new List<string>();
+                //this loops through each line in the file
+                string ip = "", device = "";
+                bool getNextDevice = false;
+                while ((line = sr.ReadLine()) != null)
+                {
+
+                    line = line.Trim(' ');
+                    if (line != "")
+                    {
+                        var result = Regex.Match(line, @"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$").Value;
+                        if (result != null && result != "")
+                        {
+                            ip = result;
+                            if (lines.Last() != "")
+                                device = lines.Last();
+                            else
+                                getNextDevice = true;
+                        }
+                        else if (line.Contains("Serial#"))
+                        {
+                            string serial = line.Substring(line.LastIndexOf(':') + 1).Trim(' ');
+                            if (serial != null)
+                            {
+                                asset a = new asset();
+                                a.device_name = device;
+                                a.ip_address = ip;
+                                a.serial_number = serial;
+                                a.source = x.name;
+                                imported_devices.Add(a);
+                                lines.Clear();
+                            }
+                        }
+                        else if (getNextDevice)
+                        {
+                            getNextDevice = false;
+                            device = line;
+                        }
+                    }
+                    lines.Add(line);
+                }
+                sr.Close();
+            }
+        }
         //this function handles writing the compared data to excel file.
         //calling functions: save button on form.
         public void write_to_excel(string x, BindingList<asset> exportList)
