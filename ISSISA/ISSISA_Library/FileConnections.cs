@@ -209,13 +209,20 @@ namespace ISSISA_Library
                                 a.physical_location = parts.ElementAt(3);
                                 break;
                             //Wireless_Controllers
+                            //File Name conflict in 2016 & 2017. different column names and locations. original code in comment
                             case 'W':
-                                a.controller_name = parts.ElementAt(0);
-                                a.ip_address = parts.ElementAt(1);
-                                a.physical_location = parts.ElementAt(2);
-                                a.status = parts.ElementAt(3);
-                                a.serial_number = parts.ElementAt(4);
-                                a.model = parts.ElementAt(5);
+                                //a.controller_name = parts.ElementAt(0);
+                                //a.ip_address = parts.ElementAt(1);
+                                //a.physical_location = parts.ElementAt(2);
+                                //a.status = parts.ElementAt(3);
+                                //a.serial_number = parts.ElementAt(4);
+                                //a.model = parts.ElementAt(5);
+                                a.model = parts.ElementAt(0);
+                                a.device_name = parts.ElementAt(1);
+                                a.description = parts.ElementAt(3);
+                                a.physical_location = parts.ElementAt(4);
+                                a.contact = parts.ElementAt(5);
+                                a.serial_number = parts.ElementAt(6);
                                 break;
                             //aps_wireless
                             case 'A':
@@ -392,7 +399,8 @@ namespace ISSISA_Library
                     else if (x.name.Contains("aps_wireless"))
                         open_csv_file(x, 'A', "AP Name", "Disassociated AP(s)");
                     else if (x.name.Contains("Wireless_Controllers"))
-                        open_csv_file(x, 'W', "Controller Name");
+                        open_csv_file(x, 'W', "Product Series");
+                    //open_csv_file(x, 'W', "Controller Name");
                     else if (x.name.Contains("Brocade switch"))
                         open_csv_file(x, 'B', "Product Status");
                     else if (x.name.Contains("Device List- total-assest"))
