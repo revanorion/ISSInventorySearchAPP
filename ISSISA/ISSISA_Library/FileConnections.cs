@@ -211,12 +211,15 @@ namespace ISSISA_Library
                             //Wireless_Controllers
                             //File Name conflict in 2016 & 2017. different column names and locations. original code in comment
                             case 'W':
-                                //a.controller_name = parts.ElementAt(0);
-                                //a.ip_address = parts.ElementAt(1);
-                                //a.physical_location = parts.ElementAt(2);
-                                //a.status = parts.ElementAt(3);
-                                //a.serial_number = parts.ElementAt(4);
-                                //a.model = parts.ElementAt(5);
+                                a.controller_name = parts.ElementAt(0);
+                                a.ip_address = parts.ElementAt(1);
+                                a.physical_location = parts.ElementAt(2);
+                                a.status = parts.ElementAt(3);
+                                a.serial_number = parts.ElementAt(4);
+                                a.model = parts.ElementAt(5);
+                                break;
+                            //Cisco Wireless Controllers
+                            case 'C':
                                 a.model = parts.ElementAt(0);
                                 a.device_name = parts.ElementAt(1);
                                 a.description = parts.ElementAt(3);
@@ -355,6 +358,22 @@ namespace ISSISA_Library
                                 a.contact = parts.ElementAt(5);
                                 a.serial_number = parts.ElementAt(6);
                                 break;
+                            //Switchrouterinventoryserialnumber
+                            case 'I':
+                                a.device_name = parts.ElementAt(0);
+                                a.physical_location = parts.ElementAt(1);
+                                a.contact = parts.ElementAt(2);
+                                a.model = parts.ElementAt(3);
+                                a.serial_number = parts.ElementAt(5);
+                                a.children = new List<string> { parts.ElementAt(7) };
+                                break;
+                            //Wireless_APs_Yearly_Inventory_Report
+                            case 'Y':
+                                a.device_name = parts.ElementAt(0);
+                                a.model = parts.ElementAt(1);
+                                a.controller_name = parts.ElementAt(2);
+                                a.serial_number = parts.ElementAt(4);
+                                break;
                         }
                         //add source file value from what file it came from
                         a.source = x.name;
@@ -398,8 +417,10 @@ namespace ISSISA_Library
                         open_csv_file(x, 'T', "InventorySerialNumber");
                     else if (x.name.Contains("aps_wireless"))
                         open_csv_file(x, 'A', "AP Name", "Disassociated AP(s)");
+                    else if (x.name.Contains("Cisco_Wireless_Controllers"))
+                        open_csv_file(x, 'C', "Product Series");
                     else if (x.name.Contains("Wireless_Controllers"))
-                        open_csv_file(x, 'W', "Product Series");
+                        open_csv_file(x, 'W', "Controller Name");
                     //open_csv_file(x, 'W', "Controller Name");
                     else if (x.name.Contains("Brocade switch"))
                         open_csv_file(x, 'B', "Product Status");
@@ -415,6 +436,10 @@ namespace ISSISA_Library
                         open_csv_file(x, 'R', "Product Series");
                     else if (x.name.Contains("GBIC_Transceiver"))
                         open_csv_file(x, 'G', "DeviceIP Address");
+                    else if (x.name.Contains("Switchrouterinventoryserialnumber"))
+                        open_csv_file(x, 'I', "Device Name");
+                    else if (x.name.Contains("Wireless_APs_Yearly_Inventory_Report"))
+                        open_csv_file(x, 'Y', "AP Name");
                     else
                         throw new NotSupportedException();
                     break;
