@@ -445,12 +445,93 @@ namespace ISSISA_Library
                     break;
                 case ".txt":
                     if (x.name.Contains("Brocade transceivers"))
-                        open_brocade_text(x);
+                        open_txt_brocade_transceivers(x);
                     else if (x.name.Contains("Cisco Dump"))
                         open_text_dump(x);
+                    else if (x.name.Contains("failed inventory collectionLMS"))
+                        open_text_failedLMS(x);
+                    else if (x.name.Contains("Brocade"))
+                        open_text_Brocade(x);
                     break;
                 default:
                     throw new NotSupportedException();
+            }
+        }
+
+        private void open_text_failedLMS(fileNaming x)
+        {
+            string line = "", device = "", description = "";
+            using (StreamReader sr = new StreamReader(x.path))
+            {
+                //this loops through each line in the file
+                while ((line = sr.ReadLine()) != null)
+                {
+                    line = line.Trim();
+                    if (!string.IsNullOrEmpty(line))
+                    {
+
+                        if (line.Contains("#"))
+                            device = line.Substring(0, line.IndexOf('#')).Trim();
+                        else if (line.Contains("DESCR:"))
+                        {
+                            string desc = line.Substring(line.IndexOf("DESCR:") + 6).Trim().Trim('"');
+                            if (!string.IsNullOrEmpty(desc))
+                                description = desc;
+                        }
+                        else if (line.Contains("SN:"))
+                        {
+                            string serial = line.Substring(line.IndexOf("SN:") + 3).Trim();
+                            if (!string.IsNullOrEmpty(serial))
+                            {
+                                if (imported_devices.Where(im_device => im_device.serial_number.Equals(serial)).Count() == 0)
+                                {
+                                    asset a = new asset();
+                                    a.device_name = device;
+                                    a.description = description;
+                                    a.serial_number = serial;
+                                    a.source = x.name;
+                                    imported_devices.Add(a);
+                                    description = "";
+                                }
+                            }
+                        }
+                    }
+                }
+                sr.Close();
+            }
+        }
+        private void open_text_Brocade(fileNaming x)
+        {
+            string line = "", device = "";
+            using (StreamReader sr = new StreamReader(x.path))
+            {
+                //this loops through each line in the file
+                while ((line = sr.ReadLine()) != null)
+                {
+                    line = line.Trim();
+                    if (!string.IsNullOrEmpty(line))
+                    {
+
+                        if (line.Contains("SSH@"))
+                            device = line.Split('#')[0].Substring(4).Trim();                        
+                        else if (line.Contains("Serial#:"))
+                        {
+                            string serial = line.Substring(line.IndexOf("Serial#:") + 8).Trim();
+                            if (!string.IsNullOrEmpty(serial))
+                            {
+                                if (imported_devices.Where(im_device => im_device.serial_number.Equals(serial)).Count() == 0)
+                                {
+                                    asset a = new asset();
+                                    a.device_name = device;
+                                    a.serial_number = serial;
+                                    a.source = x.name;
+                                    imported_devices.Add(a);
+                                }
+                            }
+                        }
+                    }
+                }
+                sr.Close();
             }
         }
 
@@ -605,7 +686,7 @@ namespace ISSISA_Library
             }
         }
 
-        private void open_brocade_text(fileNaming x)
+        private void open_txt_brocade_transceivers(fileNaming x)
         {
             string line = "";
 
