@@ -62,24 +62,24 @@ namespace ISSISA
 
             MaximizeBox = false;
             MinimizeBox = false;
-            this.files_selected_list.BackColor = Color.AliceBlue;
-            this.finished_files_list.BackColor = Color.AliceBlue;
+            files_selected_list.BackColor = Color.AliceBlue;
+            finished_files_list.BackColor = Color.AliceBlue;
 
-            this.save_files_button.FlatStyle = FlatStyle.Popup;
-            this.save_files_button.BackColor = Color.AliceBlue;
-            this.run_button.FlatStyle = FlatStyle.Popup;
-            this.run_button.BackColor = Color.AliceBlue;
-            this.add_file_button.FlatStyle = FlatStyle.Popup;
-            this.add_file_button.BackColor = Color.AliceBlue;
-            this.remove_book_button.FlatStyle = FlatStyle.Popup;
-            this.remove_book_button.BackColor = Color.AliceBlue;
-            this.remove_file_button.FlatStyle = FlatStyle.Popup;
-            this.remove_file_button.BackColor = Color.AliceBlue;
-            this.fiscal_book_button.FlatStyle = FlatStyle.Popup;
-            this.fiscal_book_button.BackColor = Color.AliceBlue;
+            save_files_button.FlatStyle = FlatStyle.Popup;
+            save_files_button.BackColor = Color.AliceBlue;
+            run_button.FlatStyle = FlatStyle.Popup;
+            run_button.BackColor = Color.AliceBlue;
+            add_file_button.FlatStyle = FlatStyle.Popup;
+            add_file_button.BackColor = Color.AliceBlue;
+            remove_book_button.FlatStyle = FlatStyle.Popup;
+            remove_book_button.BackColor = Color.AliceBlue;
+            remove_file_button.FlatStyle = FlatStyle.Popup;
+            remove_file_button.BackColor = Color.AliceBlue;
+            fiscal_book_button.FlatStyle = FlatStyle.Popup;
+            fiscal_book_button.BackColor = Color.AliceBlue;
 
 
-            this.BackColor = Color.Cornsilk;
+            BackColor = Color.Cornsilk;
         }
 
 
@@ -92,17 +92,15 @@ namespace ISSISA
         //event handeler for add file button. dialog will appear for user to select files 
         private void add_file_button_Click(object sender, EventArgs e)
         {
-            ofd.Filter = "CSV Files (.csv)|*.csv|Excel 97-2003 (.xls)|*.xls|Text Files (.txt)|*.txt|All Files (*.*)|*.*";
+            ofd.Filter = @"CSV Files (.csv)|*.csv|Excel 97-2003 (.xls)|*.xls|Text Files (.txt)|*.txt|All Files (*.*)|*.*";
             ofd.FilterIndex = 1;
             ofd.Multiselect = true;
-            if (ofd.ShowDialog() == DialogResult.OK)
+            if (ofd.ShowDialog() != DialogResult.OK) return;
+            foreach (var x in ofd.FileNames)
             {
-                foreach (string x in ofd.FileNames)
-                {
-                    files.add_file(x);
-                }
-                filesSelectedBinding.ResetBindings(false);
+                files.add_file(x);
             }
+            filesSelectedBinding.ResetBindings(false);
 
         }
 
@@ -111,7 +109,7 @@ namespace ISSISA
         {
             if (files_selected_list.SelectedItem != null)
             {
-                fileNaming x = ((fileNaming)files_selected_list.SelectedItem);
+                var x = ((fileNaming)files_selected_list.SelectedItem);
                 files.remove_file(x);
                 filesSelectedBinding.ResetBindings(false);
                 files.finished_files.Clear();
@@ -129,17 +127,15 @@ namespace ISSISA
             ofd.Filter = "Excel Files (.xlsx)|*.xlsx|All Files (*.*)|*.*";
             ofd.FilterIndex = 1;
             ofd.Multiselect = true;
-            if (ofd.ShowDialog() == DialogResult.OK)
+            if (ofd.ShowDialog() != DialogResult.OK) return;
+            try
             {
-                try
-                {
-                    files.fiscal_book_address = ofd.FileName;
-                    fiscal_book_label.Text = files.fiscal_book_address;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                }
+                files.fiscal_book_address = ofd.FileName;
+                fiscal_book_label.Text = files.fiscal_book_address;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
             }
         }
 
@@ -291,7 +287,8 @@ device type - UPS
 Dump
 LMS switch and Router report
 Detailed_Router_Report_-_Yearly_Inventory
-Detailed_Switch_Report_-_Yearly_Inventory");
+Detailed_Switch_Report_-_Yearly_Inventory
+LMS show Inventory raw");
         }
     }
 }

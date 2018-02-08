@@ -3,15 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 using System.Data.OleDb;
 using System.Data;
 using System.Text.RegularExpressions;
 using Microsoft.VisualBasic.FileIO;
 using System.ComponentModel;
-using System.Collections;
+using System.Threading.Tasks;
 
 namespace ISSISA_Library
 {
@@ -79,17 +76,17 @@ namespace ISSISA_Library
         //calling funcitons: import_data       
         public void open_fiscal_book()
         {
-            string year = fiscal_book_address.Substring(3, 4);
-            string sheetName = "ISS Assets Inventory " + year;
-            OleDbConnection con = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + _fiscal_book_address.path + ";Extended Properties=\"Excel 12.0 Xml;HDR=NO;IMEX=1;\"");
+            var year = fiscal_book_address.Substring(3, 4);
+            var sheetName = "ISS Assets Inventory " + year;
+            var con = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + _fiscal_book_address.path + ";Extended Properties=\"Excel 12.0 Xml;HDR=NO;IMEX=1;\"");
             con.Open();
 
             try
             {
                 //Create Dataset and fill with imformation from the Excel Spreadsheet for easier reference
-                DataSet myDataSet = new DataSet();
-                OleDbDataAdapter myCommand = new OleDbDataAdapter(" SELECT * from [" + sheetName + "$]", con);
-                bool ignore = true;
+                var myDataSet = new DataSet();
+                var myCommand = new OleDbDataAdapter(" SELECT * from [" + sheetName + "$]", con);
+                var ignore = true;
                 myCommand.Fill(myDataSet);
 
                 con.Close();
@@ -98,7 +95,7 @@ namespace ISSISA_Library
                 foreach (DataRow myDataRow in myDataSet.Tables[0].Rows)
                 {
                     //Stores info in Datarow into an array
-                    Object[] cells = myDataRow.ItemArray;
+                    var cells = myDataRow.ItemArray;
                     //Traverse through each array and put into object cellContent as type Object
                     //Using Object as for some reason the Dataset reads some blank value which
                     //causes a hissy fit when trying to read. By using object I can convert to
@@ -106,11 +103,11 @@ namespace ISSISA_Library
                     var result = cells.Where(n => n.ToString() == "Asset #").ToList();
                     if (result.Count == 0 && ignore)
                         continue;
-                    else if (ignore)
+                    if (ignore)
                         ignore = false;
                     else
                     {
-                        asset b = new asset(cells[0],
+                        var b = new asset(cells[0],
                             cells[1],
                             cells[2],
                             cells[3],
@@ -124,8 +121,9 @@ namespace ISSISA_Library
                             cells[11],
                             cells[12],
                             cells[13],
-                            cells[14]);
-                        if (b.serial_number == null)
+                            cells[14],
+                            cells[15]);
+                        if (b.serial_number == null && b.fats_serial_number == null)
                             missing_devices.Add(b);
                         else
                             fb_assets.Add(b);
@@ -148,17 +146,16 @@ namespace ISSISA_Library
         //calling funcitons: add file button on form.
         public void add_file(string x)
         {
-            if (IndexOf(x, files) == 1)
+            if (IndexOf(x, files) != 1) return;
+            var myFile = new fileNaming
             {
-                fileNaming myFile = new fileNaming();
-                myFile.path = x;
-                myFile.name = Path.GetFileNameWithoutExtension(x);
-                myFile.type = Path.GetExtension(x);
+                path = x,
+                name = Path.GetFileNameWithoutExtension(x),
+                type = Path.GetExtension(x)
+            };
 
 
-                files.Add(myFile);
-
-            }
+            files.Add(myFile);
         }
 
         //removes the file from the import file list
@@ -171,7 +168,7 @@ namespace ISSISA_Library
         //this function handles the importing of data from supported type csv files.
         //calling funcitons: open_file
         //csvType defines how data is going to be removed from the csv
-        public void open_csv_file(fileNaming x, char csvType, string skipUntil = null, string breakAt = null)
+        public void open_csv_file(fileNaming x, FileType csvType, string skipUntil = null, string breakAt = null)
         {
             bool hasSkip = false, hasBreak = false, ignore = true;
             string serial;
@@ -189,20 +186,20 @@ namespace ISSISA_Library
                 csvParser.HasFieldsEnclosedInQuotes = true;
                 while (!csvParser.EndOfData)
                 {
-                    List<string> parts = csvParser.ReadFields().ToList();
-                    if (hasSkip && ignore && parts.Where(n => n.ToString().Replace("\"", "") == skipUntil).ToList().Count() == 0)
+                    var parts = csvParser.ReadFields().ToList();
+                    if (hasSkip && ignore && !parts.Where(n => n.ToString().Replace("\"", "") == skipUntil).ToList().Any())
                         continue;
-                    else if (hasBreak && parts.Where(n => n.ToString() == breakAt).ToList().Count() > 0)
+                    if (hasBreak && parts.Where(n => n.ToString() == breakAt).ToList().Any())
                         break;
-                    else if (ignore)
+                    if (ignore)
                         ignore = false;
                     else
                     {
-                        asset a = new asset();
+                        var a = new asset();
                         switch (csvType)
                         {
                             //Tropos
-                            case 'T':
+                            case FileType.Tropos:
                                 a.serial_number = parts.ElementAt(0);
                                 a.ip_address = parts.ElementAt(1);
                                 a.status = parts.ElementAt(2);
@@ -210,7 +207,7 @@ namespace ISSISA_Library
                                 break;
                             //Wireless_Controllers
                             //File Name conflict in 2016 & 2017. different column names and locations. original code in comment
-                            case 'W':
+                            case FileType.WirelessControllers:
                                 a.controller_name = parts.ElementAt(0);
                                 a.ip_address = parts.ElementAt(1);
                                 a.physical_location = parts.ElementAt(2);
@@ -219,7 +216,7 @@ namespace ISSISA_Library
                                 a.model = parts.ElementAt(5);
                                 break;
                             //Cisco Wireless Controllers
-                            case 'C':
+                            case FileType.CiscoWirelessControllers:
                                 a.model = parts.ElementAt(0);
                                 a.device_name = parts.ElementAt(1);
                                 a.description = parts.ElementAt(3);
@@ -228,7 +225,7 @@ namespace ISSISA_Library
                                 a.serial_number = parts.ElementAt(6);
                                 break;
                             //aps_wireless
-                            case 'A':
+                            case FileType.ApsWireless:
                                 a.device_name = parts.ElementAt(0);
                                 a.mac_address = parts.ElementAt(1);
                                 a.ip_address = parts.ElementAt(2);
@@ -238,12 +235,12 @@ namespace ISSISA_Library
                                 a.controller_name = parts.ElementAt(6);
                                 break;
                             //device type - UPS
-                            case 'S':
+                            case FileType.DeviceTypeUps:
                                 if (parts.ToArray().Length > 6)
                                     a.serial_number = parts.ElementAt(3).Replace("\"", "");
                                 else
                                     continue;
-                                if (a.serial_number == null || a.serial_number == "" || a.serial_number.Contains("Serial Number"))
+                                if (string.IsNullOrEmpty(a.serial_number) || a.serial_number.Contains("Serial Number"))
                                     continue;
                                 a.ip_address = parts.ElementAt(0).Replace("\"", "");
                                 a.hostname = parts.ElementAt(1).Replace("\"", "");
@@ -252,13 +249,13 @@ namespace ISSISA_Library
                                 a.physical_location = parts.ElementAt(5).Replace("\"", "") + " " + parts.ElementAt(6).Replace("\"", "");
                                 break;
                             //Brocade switch
-                            case 'B':
+                            case FileType.BrocadeSwitch:
 
                                 serial = parts.ElementAt(6).Replace("\"", "");
-                                List<string> serialList = serial.Split(';').ToList();
+                                var serialList = serial.Split(';').ToList();
                                 if (serialList.Last() == "")
                                     serialList.RemoveAt(serialList.Count() - 1);
-                                Regex r = new Regex(@"^Unit\s\d+\s-\s");
+                                var r = new Regex(@"^Unit\s\d+\s-\s");
                                 a.status = parts.ElementAt(0).Replace("\"", "");
                                 a.device_name = parts.ElementAt(1).Replace("\"", "");
                                 a.ip_address = parts.ElementAt(4).Replace("\"", "");
@@ -268,9 +265,9 @@ namespace ISSISA_Library
                                 a.physical_location = parts.ElementAt(11).Replace("\"", "");
                                 a.last_scanned = parts.ElementAt(12).Replace("\"", "");
                                 a.source = x.name;
-                                foreach (string s in serialList)
+                                foreach (var s in serialList)
                                 {
-                                    asset b = new asset(a);
+                                    var b = new asset(a);
                                     serial = s;
                                     if (s.Contains("Unit"))
                                     {
@@ -282,7 +279,7 @@ namespace ISSISA_Library
                                 }
                                 break;
                             //Device List- total-assest
-                            case 'D':
+                            case FileType.DeviceListTotalAssest:
 
                                 a.description = parts.ElementAt(0);
                                 a.model = parts.ElementAt(1);
@@ -298,7 +295,7 @@ namespace ISSISA_Library
 
                                 break;
                             //UPS yyyy Device List
-                            case 'U':
+                            case FileType.UpsDeviceList:
                                 a.model = parts.ElementAt(0);
                                 a.hostname = parts.ElementAt(1);
                                 a.serial_number = parts.ElementAt(2);
@@ -310,20 +307,20 @@ namespace ISSISA_Library
                                 a.location = parts.ElementAt(8);
                                 break;
                             //GBIC Transceiver Report
-                            case 'G':
+                            case FileType.GbicTransceiver:
                                 a.ip_address = parts.ElementAt(0);
                                 a.device_name = parts.ElementAt(1);
                                 a.description = parts.ElementAt(2);
                                 a.serial_number = parts.ElementAt(5);
                                 break;
                             //LMS switch and Router report
-                            case 'L':
+                            case FileType.LmsSwitchAndRouterReport:
                                 if (parts.ElementAt(0) == "")
                                     continue;
                                 serial = parts.ElementAt(5);
 
                                 a = imported_devices.FirstOrDefault(p => p.serial_number == serial);
-                                string childSN = parts.ElementAt(7);
+                                var childSN = parts.ElementAt(7);
                                 if (a == null)
                                 {
                                     a = new asset();
@@ -332,34 +329,31 @@ namespace ISSISA_Library
                                     a.contact = parts.ElementAt(2);
                                     a.model = parts.ElementAt(3);
                                     a.serial_number = serial;
-                                    if (childSN != null && childSN != "" && childSN != "N/A")
+                                    if (!string.IsNullOrEmpty(childSN) && childSN != "N/A")
                                     {
                                         addChild(a, childSN, x);
                                     }
                                     imported_devices.Add(a);
                                 }
-                                else if (childSN != null && childSN != "" && childSN != "N/A")
+                                else if (!string.IsNullOrEmpty(childSN) && childSN != "N/A")
                                 {
                                     addChild(a, childSN, x);
                                 }
 
                                 break;
                             //Detailed_Router_Report_-_Yearly_Inventory                        
-                            case 'R':
+                            case FileType.DetailedRouterReportYearlyInventory:
                                 a.model = parts.ElementAt(0);
                                 a.device_name = parts.ElementAt(1);
-                                int index = parts.ElementAt(3).IndexOf("RELEASE SOFTWARE");
-                                if (index != -1)
-                                    a.description = parts.ElementAt(3).Substring(0, index - 2);
-                                else
-                                    a.description = parts.ElementAt(3);
+                                var index = parts.ElementAt(3).IndexOf("RELEASE SOFTWARE");
+                                a.description = index != -1 ? parts.ElementAt(3).Substring(0, index - 2) : parts.ElementAt(3);
                                 a.description.Replace(System.Environment.NewLine, "");
                                 a.physical_location = parts.ElementAt(4);
                                 a.contact = parts.ElementAt(5);
                                 a.serial_number = parts.ElementAt(6);
                                 break;
                             //Switchrouterinventoryserialnumber
-                            case 'I':
+                            case FileType.SwitchRouterInventorySerialNumber:
                                 a.device_name = parts.ElementAt(0);
                                 a.physical_location = parts.ElementAt(1);
                                 a.contact = parts.ElementAt(2);
@@ -368,7 +362,7 @@ namespace ISSISA_Library
                                 a.children = new List<string> { parts.ElementAt(7) };
                                 break;
                             //Wireless_APs_Yearly_Inventory_Report
-                            case 'Y':
+                            case FileType.WirelessAPsYearlyInventoryReport:
                                 a.device_name = parts.ElementAt(0);
                                 a.model = parts.ElementAt(1);
                                 a.controller_name = parts.ElementAt(2);
@@ -378,7 +372,7 @@ namespace ISSISA_Library
                         //add source file value from what file it came from
                         a.source = x.name;
                         //this is because i did a deep copy from asset a to b. L because special case that has children SN 
-                        if (a.serial_number != "" && csvType != 'B' && csvType != 'L')
+                        if (a.serial_number != "" && csvType != FileType.BrocadeSwitch && csvType != FileType.LmsSwitchAndRouterReport)
                         {
                             imported_devices.Add(a);
                         }
@@ -393,13 +387,31 @@ namespace ISSISA_Library
         public void addChild(asset a, string childSN, fileNaming x)
         {
             a.children.Add(childSN);
-            asset b = new asset(a);
-            b.serial_number = childSN;
+            var b = new asset(a) { serial_number = childSN };
             b.children.Clear();
             b.master = a.serial_number;
             b.source = x.name;
             imported_devices.Add(b);
         }
+
+
+        public enum FileType
+        {
+            Tropos,
+            ApsWireless,
+            CiscoWirelessControllers,
+            WirelessControllers,
+            BrocadeSwitch,
+            DeviceListTotalAssest,
+            UpsDeviceList,
+            LmsSwitchAndRouterReport,
+            DeviceTypeUps,
+            DetailedRouterReportYearlyInventory,
+            GbicTransceiver,
+            SwitchRouterInventorySerialNumber,
+            WirelessAPsYearlyInventoryReport
+        }
+
 
 
         public void open_file(fileNaming x)
@@ -414,32 +426,32 @@ namespace ISSISA_Library
                     break;
                 case ".csv":
                     if (x.name.Contains("Tropos"))
-                        open_csv_file(x, 'T', "InventorySerialNumber");
+                        open_csv_file(x, FileType.Tropos, "InventorySerialNumber");
                     else if (x.name.Contains("aps_wireless"))
-                        open_csv_file(x, 'A', "AP Name", "Disassociated AP(s)");
+                        open_csv_file(x, FileType.ApsWireless, "AP Name", "Disassociated AP(s)");
                     else if (x.name.Contains("Cisco_Wireless_Controllers"))
-                        open_csv_file(x, 'C', "Product Series");
+                        open_csv_file(x, FileType.CiscoWirelessControllers, "Product Series");
                     else if (x.name.Contains("Wireless_Controllers"))
-                        open_csv_file(x, 'W', "Controller Name");
+                        open_csv_file(x, FileType.WirelessControllers, "Controller Name");
                     //open_csv_file(x, 'W', "Controller Name");
                     else if (x.name.Contains("Brocade switch"))
-                        open_csv_file(x, 'B', "Product Status");
+                        open_csv_file(x, FileType.BrocadeSwitch, "Product Status");
                     else if (x.name.Contains("Device List- total-assest"))
-                        open_csv_file(x, 'D', "Type");
+                        open_csv_file(x, FileType.DeviceListTotalAssest, "Type");
                     else if (x.name.Contains("UPS") && x.name.Contains("Device List"))
-                        open_csv_file(x, 'U', "Model");
+                        open_csv_file(x, FileType.UpsDeviceList, "Model");
                     else if (x.name.Contains("LMS switch and Router report"))
-                        open_csv_file(x, 'L', "Device Name");
+                        open_csv_file(x, FileType.LmsSwitchAndRouterReport, "Device Name");
                     else if (x.name.Contains("device type - UPS"))
-                        open_csv_file(x, 'S');
+                        open_csv_file(x, FileType.DeviceTypeUps);
                     else if (x.name.Contains("Detailed_Router_Report_-_Yearly_Inventory") || x.name.Contains("Detailed_Switch_Report_-_Yearly_Inventory"))
-                        open_csv_file(x, 'R', "Product Series");
+                        open_csv_file(x, FileType.DetailedRouterReportYearlyInventory, "Product Series");
                     else if (x.name.Contains("GBIC_Transceiver"))
-                        open_csv_file(x, 'G', "DeviceIP Address");
+                        open_csv_file(x, FileType.GbicTransceiver, "DeviceIP Address");
                     else if (x.name.Contains("Switchrouterinventoryserialnumber"))
-                        open_csv_file(x, 'I', "Device Name");
+                        open_csv_file(x, FileType.SwitchRouterInventorySerialNumber, "Device Name");
                     else if (x.name.Contains("Wireless_APs_Yearly_Inventory_Report"))
-                        open_csv_file(x, 'Y', "AP Name");
+                        open_csv_file(x, FileType.WirelessAPsYearlyInventoryReport, "AP Name");
                     else
                         throw new NotSupportedException();
                     break;
@@ -452,49 +464,77 @@ namespace ISSISA_Library
                         open_text_failedLMS(x);
                     else if (x.name.Contains("Brocade"))
                         open_text_Brocade(x);
+                    else if (x.name.Contains("LMS show Inventory"))
+                        open_text_LMS_show_inv(x);
                     break;
                 default:
                     throw new NotSupportedException();
             }
         }
 
+        private void open_text_LMS_show_inv(fileNaming x)
+        {
+            var strings = File.ReadAllLines(x.path).ToList();
+            string device = "", description = "";
+            var splitter = new[] { "SN:" };
+            foreach (var element in strings)
+            {
+                if (element.Contains("Device Name"))
+                    device = element.Split(':')[1].Trim();
+                else if (element.Contains("DESCR:"))
+                    description = element.Substring(element.IndexOf("DESCR:") + 6).Trim().Trim('"');
+                else if (element.Contains("SN:"))
+                {
+                    var splitStr = element.Split(splitter, StringSplitOptions.None);
+                    if (splitStr.Length <= 1) continue;
+                    var serial = splitStr[1].Trim();
+                    if (string.IsNullOrEmpty(serial)) continue;
+                    if (imported_devices.Any(im_device => im_device.serial_number.Equals(serial))) continue;
+                    var a = new asset
+                    {
+                        device_name = device,
+                        description = description,
+                        serial_number = serial,
+                        source = x.name
+                    };
+                    imported_devices.Add(a);
+                }
+            }
+        }
+
         private void open_text_failedLMS(fileNaming x)
         {
-            string line = "", device = "", description = "";
-            using (StreamReader sr = new StreamReader(x.path))
+            string device = "", description = "";
+            using (var sr = new StreamReader(x.path))
             {
                 //this loops through each line in the file
+                var line = "";
                 while ((line = sr.ReadLine()) != null)
                 {
                     line = line.Trim();
-                    if (!string.IsNullOrEmpty(line))
+                    if (string.IsNullOrEmpty(line)) continue;
+                    if (line.Contains("#"))
+                        device = line.Substring(0, line.IndexOf('#')).Trim();
+                    else if (line.Contains("DESCR:"))
                     {
-
-                        if (line.Contains("#"))
-                            device = line.Substring(0, line.IndexOf('#')).Trim();
-                        else if (line.Contains("DESCR:"))
+                        var desc = line.Substring(line.IndexOf("DESCR:") + 6).Trim().Trim('"');
+                        if (!string.IsNullOrEmpty(desc))
+                            description = desc;
+                    }
+                    else if (line.Contains("SN:"))
+                    {
+                        var serial = line.Substring(line.IndexOf("SN:") + 3).Trim();
+                        if (string.IsNullOrEmpty(serial)) continue;
+                        if (imported_devices.Any(im_device => im_device.serial_number.Equals(serial))) continue;
+                        var a = new asset
                         {
-                            string desc = line.Substring(line.IndexOf("DESCR:") + 6).Trim().Trim('"');
-                            if (!string.IsNullOrEmpty(desc))
-                                description = desc;
-                        }
-                        else if (line.Contains("SN:"))
-                        {
-                            string serial = line.Substring(line.IndexOf("SN:") + 3).Trim();
-                            if (!string.IsNullOrEmpty(serial))
-                            {
-                                if (imported_devices.Where(im_device => im_device.serial_number.Equals(serial)).Count() == 0)
-                                {
-                                    asset a = new asset();
-                                    a.device_name = device;
-                                    a.description = description;
-                                    a.serial_number = serial;
-                                    a.source = x.name;
-                                    imported_devices.Add(a);
-                                    description = "";
-                                }
-                            }
-                        }
+                            device_name = device,
+                            description = description,
+                            serial_number = serial,
+                            source = x.name
+                        };
+                        imported_devices.Add(a);
+                        description = "";
                     }
                 }
                 sr.Close();
@@ -503,7 +543,7 @@ namespace ISSISA_Library
         private void open_text_Brocade(fileNaming x)
         {
             string line = "", device = "";
-            using (StreamReader sr = new StreamReader(x.path))
+            using (var sr = new StreamReader(x.path))
             {
                 //this loops through each line in the file
                 while ((line = sr.ReadLine()) != null)
@@ -513,21 +553,20 @@ namespace ISSISA_Library
                     {
 
                         if (line.Contains("SSH@"))
-                            device = line.Split('#')[0].Substring(4).Trim();                        
+                            device = line.Split('#')[0].Substring(4).Trim();
                         else if (line.Contains("Serial#:"))
                         {
-                            string serial = line.Substring(line.IndexOf("Serial#:") + 8).Trim();
-                            if (!string.IsNullOrEmpty(serial))
+                            var serial = line.Substring(line.IndexOf("Serial#:") + 8).Trim();
+                            if (string.IsNullOrEmpty(serial)) continue;
+                            if (imported_devices.Count(im_device => im_device.serial_number.Equals(serial)) !=
+                                0) continue;
+                            var a = new asset
                             {
-                                if (imported_devices.Where(im_device => im_device.serial_number.Equals(serial)).Count() == 0)
-                                {
-                                    asset a = new asset();
-                                    a.device_name = device;
-                                    a.serial_number = serial;
-                                    a.source = x.name;
-                                    imported_devices.Add(a);
-                                }
-                            }
+                                device_name = device,
+                                serial_number = serial,
+                                source = x.name
+                            };
+                            imported_devices.Add(a);
                         }
                     }
                 }
@@ -537,20 +576,14 @@ namespace ISSISA_Library
 
         private void open_xls_file(fileNaming x, string skipUntil = null, string breakAt = null)
         {
-            bool hasSkip = false, hasBreak = false, ignore = true;
+            var ignore = !(skipUntil == null && breakAt == null);
 
-            if (skipUntil == null && breakAt == null)
-                ignore = false;
-            if (skipUntil != null)
-                hasSkip = true;
-            if (breakAt != null)
-                hasBreak = true;
             char xlsType;
             if (x.name.Contains("TMS-Inventory"))
                 xlsType = 'T';
             else
                 throw new NotSupportedException();
-            string sheetName = "";
+            var sheetName = "";
             switch (xlsType)
             {
                 case 'T':
@@ -560,23 +593,22 @@ namespace ISSISA_Library
                     sheetName = "Sheet1";
                     break;
             }
-            OleDbConnection con = new OleDbConnection(@"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + x.path + @";Extended Properties=""Excel 8.0;HDR=YES;""");
+            var con = new OleDbConnection(@"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + x.path + @";Extended Properties=""Excel 8.0;HDR=YES;""");
             con.Open();
 
             try
             {
                 //Create Dataset and fill with imformation from the Excel Spreadsheet for easier reference
-                DataSet myDataSet = new DataSet();
-                OleDbDataAdapter myCommand = new OleDbDataAdapter(" SELECT * from [" + sheetName + "$]", con);
+                var myDataSet = new DataSet();
+                var myCommand = new OleDbDataAdapter(" SELECT * from [" + sheetName + "$]", con);
                 myCommand.Fill(myDataSet);
-                DataTable d;
                 con.Close();
 
                 //Travers through each row in the dataset
                 foreach (DataRow myDataRow in myDataSet.Tables[0].Rows)
                 {
                     //Stores info in Datarow into an array
-                    Object[] cells = myDataRow.ItemArray;
+                    var cells = myDataRow.ItemArray;
                     //Traverse through each array and put into object cellContent as type Object
                     //Using Object as for some reason the Dataset reads some blank value which
                     //causes a hissy fit when trying to read. By using object I can convert to
@@ -584,11 +616,11 @@ namespace ISSISA_Library
                     var result = cells.Where(n => n.ToString() == skipUntil).ToList();
                     if (result.Count == 0 && ignore)
                         continue;
-                    else if (ignore)
+                    if (ignore)
                         ignore = false;
                     else
                     {
-                        asset a = new asset();
+                        var a = new asset();
                         switch (xlsType)
                         {
                             case 'T':
@@ -617,70 +649,64 @@ namespace ISSISA_Library
         //calling functions: open_file
         private void open_text_dump(fileNaming x)
         {
-            string line = "";
-
-
-            using (StreamReader sr = new StreamReader(x.path))
+            using (var sr = new StreamReader(x.path))
             {
                 //this loops through each line in the file
+                var line = "";
                 while ((line = sr.ReadLine()) != null)
                 {
 
                     //this attempts to see if the string exists in the line if it does continue
-                    int index = line.IndexOf("Device Name");
+                    var index = line.IndexOf("Device Name");
 
-                    if (index != -1)
+                    if (index == -1) continue;
+                    //grab the device name for all the corresponding serials
+                    var deviceName = line.Substring(15);
+                    //string masterSN = "";
+                    var serials = new List<string>();
+
+                    //this loops through each line after device has been found until it hits #.
+                    while ((line = sr.ReadLine()) != null && (line.IndexOf("#") == -1 || line.IndexOf("Serial#") > 1))
                     {
-
-                        //grab the device name for all the corresponding serials
-                        string deviceName = line.Substring(15);
-                        //string masterSN = "";
-                        List<string> serials = new List<string>();
-
-                        //this loops through each line after device has been found until it hits #.
-                        while ((line = sr.ReadLine()) != null && (line.IndexOf("#") == -1 || line.IndexOf("Serial#") > 1))
+                        //logical error checking for stupid data
+                        if (line.IndexOf("SN: 0x") != -1 || line.IndexOf("SN: N/A") != -1 ||
+                            line.IndexOf("NAME:") != -1) continue;
+                        //if a serial number exists grab the data
+                        if ((index = line.IndexOf("SN:")) <= 1) continue;
+                        line = line.Substring(index + 4);
+                        //if serial is not null
+                        if (line != "")
                         {
-                            //logical error checking for stupid data
-                            if (line.IndexOf("SN: 0x") == -1 && line.IndexOf("SN: N/A") == -1 && line.IndexOf("NAME:") == -1)
-                            {
-                                //if a serial number exists grab the data
-                                if ((index = line.IndexOf("SN:")) > 1)
-                                {
-                                    line = line.Substring(index + 4);
-                                    //if serial is not null
-                                    if (line != "")
-                                    {
-                                        //if it is the first serial number make it the master
-                                        //if (masterSN == "")
-                                        //    masterSN = line;
-                                        serials.Add(line);
-                                    }
-                                }
-                            }
+                            //if it is the first serial number make it the master
+                            //if (masterSN == "")
+                            //    masterSN = line;
+                            serials.Add(line);
                         }
-                        foreach (string sn in serials)
-                        {
-                            asset a = new asset();
-                            a.serial_number = sn;
-                            a.device_name = deviceName;
-                            if (serials.ElementAt(0) == sn && serials.Count > 1)
-                                a.children = serials.Skip(1).ToList();
-                            else
-                                a.master = serials.ElementAt(0);
-                            a.source = x.name;
-                            imported_devices.Add(a);
-                        }
-                        //foreach (string sn in serials)
-                        //{
-                        //    asset a = new asset();
-                        //    a.serial_number = sn;
-                        //    a.device_name = deviceName;
-                        //    if (masterSN == sn)
-                        //        a.description = "Master SN";
-                        //    a.source = x.name;
-                        //    imported_devices.Add(a);
-                        //}
                     }
+                    foreach (var sn in serials)
+                    {
+                        var a = new asset
+                        {
+                            serial_number = sn,
+                            device_name = deviceName
+                        };
+                        if (serials.ElementAt(0) == sn && serials.Count > 1)
+                            a.children = serials.Skip(1).ToList();
+                        else
+                            a.master = serials.ElementAt(0);
+                        a.source = x.name;
+                        imported_devices.Add(a);
+                    }
+                    //foreach (string sn in serials)
+                    //{
+                    //    asset a = new asset();
+                    //    a.serial_number = sn;
+                    //    a.device_name = deviceName;
+                    //    if (masterSN == sn)
+                    //        a.description = "Master SN";
+                    //    a.source = x.name;
+                    //    imported_devices.Add(a);
+                    //}
                 }
                 sr.Close();
             }
@@ -688,15 +714,13 @@ namespace ISSISA_Library
 
         private void open_txt_brocade_transceivers(fileNaming x)
         {
-            string line = "";
-
-
-            using (StreamReader sr = new StreamReader(x.path))
+            using (var sr = new StreamReader(x.path))
             {
-                List<string> lines = new List<string>();
+                var lines = new List<string>();
                 //this loops through each line in the file
                 string ip = "", device = "";
-                bool getNextDevice = false;
+                var getNextDevice = false;
+                var line = "";
                 while ((line = sr.ReadLine()) != null)
                 {
 
@@ -704,7 +728,7 @@ namespace ISSISA_Library
                     if (line != "")
                     {
                         var result = Regex.Match(line, @"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$").Value;
-                        if (result != null && result != "")
+                        if (!string.IsNullOrEmpty(result))
                         {
                             ip = result;
                             if (lines.Last() != "")
@@ -714,14 +738,16 @@ namespace ISSISA_Library
                         }
                         else if (line.Contains("Serial#"))
                         {
-                            string serial = line.Substring(line.LastIndexOf(':') + 1).Trim(' ');
+                            var serial = line.Substring(line.LastIndexOf(':') + 1).Trim(' ');
                             if (serial != null)
                             {
-                                asset a = new asset();
-                                a.device_name = device;
-                                a.ip_address = ip;
-                                a.serial_number = serial;
-                                a.source = x.name;
+                                var a = new asset
+                                {
+                                    device_name = device,
+                                    ip_address = ip,
+                                    serial_number = serial,
+                                    source = x.name
+                                };
                                 imported_devices.Add(a);
                                 lines.Clear();
                             }
@@ -747,8 +773,8 @@ namespace ISSISA_Library
                 return;
             }
             xlApp.Visible = false;
-            Excel.Workbook wb = xlApp.Workbooks.Add(Excel.XlWBATemplate.xlWBATWorksheet);
-            Excel.Worksheet ws = (Excel.Worksheet)wb.Worksheets[1];
+            var wb = xlApp.Workbooks.Add(Excel.XlWBATemplate.xlWBATWorksheet);
+            var ws = (Excel.Worksheet)wb.Worksheets[1];
 
             if (ws == null)
             {
@@ -772,6 +798,7 @@ namespace ISSISA_Library
             ws.Cells[rows, columns++] = "Cost";
             ws.Cells[rows, columns++] = "Last Inv";
             ws.Cells[rows, columns++] = "Serial #";
+            ws.Cells[rows, columns++] = "Serial # Per FATS";
             ws.Cells[rows, columns++] = "Master SN";
             ws.Cells[rows, columns++] = "Children SN";
             ws.Cells[rows, columns++] = "FATS Owner";
@@ -789,7 +816,10 @@ namespace ISSISA_Library
 
             columns = 1;
             //write the data
-            foreach (asset a in exportList)
+            //Parallel.ForEach(exportList, a =>
+            //{
+
+            foreach (var a in exportList)
             {
                 ws.Cells[rows, columns++] = a.asset_number;
                 ws.Cells[rows, columns++] = a.missing.ToString();
@@ -805,9 +835,10 @@ namespace ISSISA_Library
                 ws.Cells[rows, columns++] = a.cost;
                 ws.Cells[rows, columns++] = a.last_inv.ToString();
                 ws.Cells[rows, columns++] = a.serial_number;
+                ws.Cells[rows, columns++] = a.fats_serial_number;
                 ws.Cells[rows, columns++] = a.master;
                 ws.Cells[rows, columns] = "";
-                foreach (string child in a.children)
+                foreach (var child in a.children)
                 {
                     var cellValue = (string)(ws.Cells[rows, columns] as Excel.Range).Value;
                     ws.Cells[rows, columns] = cellValue + child + ";";
@@ -827,7 +858,7 @@ namespace ISSISA_Library
                 ws.Cells[rows++, columns] = a.source;
                 columns = 1;
             }
-
+            //});
             //save the file using the param as the path and name
             ws.Columns.AutoFit();
             wb.SaveAs(x);
@@ -847,14 +878,16 @@ namespace ISSISA_Library
             //found_devices = fb_assets;
 
             //loops through each asset in list
-            foreach (asset a in imported_devices)
+
+
+            foreach (var a in imported_devices)
             {
                 //grab the asset from fiscal book that has matching serials from imported device data
 
-                asset existingAsset = fb_assets.FirstOrDefault(x => x.serial_number.Contains(a.serial_number));
+                var existingAsset = fb_assets.AsParallel().FirstOrDefault(x => x.serial_number.Contains(a.serial_number) || x.fats_serial_number.Contains(a.serial_number));
                 if (existingAsset != null)
                 {
-                    asset found = new asset(existingAsset);
+                    var found = new asset(existingAsset);
                     updateFoundAsset(found, a);
                     found_devices.Add(found);
 
@@ -862,7 +895,7 @@ namespace ISSISA_Library
                 else
                 {
                     //doesnt exist
-                    asset missing = new asset(a);
+                    var missing = new asset(a);
                     missing_devices.Add(missing);
                 }
             }
@@ -871,13 +904,13 @@ namespace ISSISA_Library
         public void updateFoundAsset(asset a, asset b)
         {
             //update some of the found device fields by combining data
-            if (!String.IsNullOrEmpty(b.description))
+            if (!string.IsNullOrEmpty(b.description))
                 a.description = a.description + " (" + b.description + ")";
-            if (!String.IsNullOrEmpty(b.model))
+            if (!string.IsNullOrEmpty(b.model))
                 a.model = a.model + " (" + b.model + ")";
-            if (!String.IsNullOrEmpty(b.physical_location))
+            if (!string.IsNullOrEmpty(b.physical_location))
                 a.physical_location = a.physical_location + " (" + b.physical_location + ")";
-            if (!String.IsNullOrEmpty(b.location) && !a.location.Contains(b.location))
+            if (!string.IsNullOrEmpty(b.location) && !a.location.Contains(b.location))
                 a.location = a.location + " (" + b.location + ")";
             a.serial_number = b.serial_number;
             a.status = b.status;
@@ -900,9 +933,9 @@ namespace ISSISA_Library
         public void show_imported_devices()
         {
 
-            using (StreamWriter sw = new StreamWriter("custs.txt"))
+            using (var sw = new StreamWriter("custs.txt"))
             {
-                foreach (asset a in imported_devices)
+                foreach (var a in imported_devices)
                 {
                     sw.WriteLine(a.output());
                 }
@@ -915,7 +948,7 @@ namespace ISSISA_Library
         public int IndexOf(string x, List<fileNaming> a)
         {
             x = Path.GetFileNameWithoutExtension(x);
-            foreach (fileNaming y in a)
+            foreach (var y in a)
             {
                 if (x.Equals(y.name))
                 {
@@ -947,7 +980,7 @@ namespace ISSISA_Library
             open_fiscal_book();
 
             //open each file in the list
-            foreach (fileNaming file in files)
+            foreach (var file in files)
             {
                 open_file(file);
             }
@@ -955,7 +988,7 @@ namespace ISSISA_Library
             //then compare the data
             compare();
             //get the current date
-            string date = DateTime.Now.ToString("yyyyMMdd");
+            var date = DateTime.Now.ToString("yyyyMMdd");
 
             //add report to finished files list
             finished_files.Add(new fileNaming(date + " Inventory Report "));
@@ -974,7 +1007,7 @@ namespace ISSISA_Library
             //then validate the data
             validate();
             //get the current date
-            string date = DateTime.Now.ToString("yyyyMMdd");
+            var date = DateTime.Now.ToString("yyyyMMdd");
 
             //add report to finished files list
             finished_files.Add(new fileNaming(date + " Inventory Report "));
@@ -982,16 +1015,16 @@ namespace ISSISA_Library
 
         private void open_review_book()
         {
-            string sheetName = "Advantage_FATS";
-            OleDbConnection con = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + _fiscal_book_address.path + ";Extended Properties=\"Excel 12.0 Xml;HDR=NO;IMEX=1;\"");
+            const string sheetName = "Advantage_FATS";
+            var con = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + _fiscal_book_address.path + ";Extended Properties=\"Excel 12.0 Xml;HDR=NO;IMEX=1;\"");
             con.Open();
 
             try
             {
                 //Create Dataset and fill with imformation from the Excel Spreadsheet for easier reference
-                DataSet myDataSet = new DataSet();
-                OleDbDataAdapter myCommand = new OleDbDataAdapter(" SELECT * from [" + sheetName + "$]", con);
-                bool ignore = true;
+                var myDataSet = new DataSet();
+                var myCommand = new OleDbDataAdapter(" SELECT * from [" + sheetName + "$]", con);
+                var ignore = true;
                 myCommand.Fill(myDataSet);
                 con.Close();
 
@@ -999,7 +1032,7 @@ namespace ISSISA_Library
                 foreach (DataRow myDataRow in myDataSet.Tables[0].Rows)
                 {
                     //Stores info in Datarow into an array
-                    Object[] cells = myDataRow.ItemArray;
+                    var cells = myDataRow.ItemArray;
                     //Traverse through each array and put into object cellContent as type Object
                     //Using Object as for some reason the Dataset reads some blank value which
                     //causes a hissy fit when trying to read. By using object I can convert to
@@ -1007,11 +1040,11 @@ namespace ISSISA_Library
                     var result = cells.Where(n => n.ToString() == "ASSET_NUMBER").ToList();
                     if (result.Count == 0 && ignore)
                         continue;
-                    else if (ignore)
+                    if (ignore)
                         ignore = false;
                     else
                     {
-                        asset b = new asset(cells[0],
+                        var b = new asset(cells[0],
                             cells[2],
                             cells[4],
                             cells[6],
@@ -1098,18 +1131,14 @@ namespace ISSISA_Library
                 return;
             }
             xlApp.Visible = false;
-            Excel.Workbook wb = xlApp.Workbooks.Add(Excel.XlWBATemplate.xlWBATWorksheet);
+            var wb = xlApp.Workbooks.Add(Excel.XlWBATemplate.xlWBATWorksheet);
 
 
-            foreach (KeyValuePair<string, BindingList<asset>> worksheet in worksheets)
+            foreach (var worksheet in worksheets)
             {
 
                 //Excel.Worksheet ws = (Excel.Worksheet)wb.Worksheets[worksheet.Key];
-                Excel.Worksheet ws;
-                if (wb.Sheets.Count == 0)
-                    ws = wb.Sheets.Add();
-                else
-                    ws = wb.Sheets.Add(After: wb.Sheets[wb.Sheets.Count]);
+                var ws = wb.Sheets.Count == 0 ? (Excel.Worksheet)wb.Sheets.Add() : (Excel.Worksheet)wb.Sheets.Add(After: wb.Sheets[wb.Sheets.Count]);
                 ws.Name = worksheet.Key;
                 if (ws == null)
                 {
@@ -1150,7 +1179,7 @@ namespace ISSISA_Library
 
                 columns = 1;
                 //write the data
-                foreach (asset a in worksheet.Value)
+                foreach (var a in worksheet.Value)
                 {
                     ws.Cells[rows, columns++] = a.asset_number;
                     //ws.Cells[rows, columns++] = a.missing.ToString();
@@ -1211,7 +1240,7 @@ namespace ISSISA_Library
                 return;
             }
             xlApp.Visible = true;
-            Excel.Workbooks openwb = xlApp.Workbooks;
+            var openwb = xlApp.Workbooks;
             openwb.Open(x);
         }
 
