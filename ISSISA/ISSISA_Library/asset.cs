@@ -81,7 +81,7 @@ namespace ISSISA_Library
         public asset(object asset_number, object missing, object iss_division, object description,
             object model, object asset_type, object location, object physical_location,
             object room_per_advantage, object room_per_fats, object cost, object last_inv,
-            object serial_number, object fats_owner, object notes)
+            object serial_number, object serial_number_per_fats, object fats_owner, object notes)
         {
             //Make sure the object params are not null then convert them into specified data type
             if (asset_number != Convert.DBNull)
@@ -107,7 +107,7 @@ namespace ISSISA_Library
             //Remove all characters for cost that would stop the process to convert to number
             if (cost != Convert.DBNull)
             {
-                string myCost = cost.ToString();
+                var myCost = cost.ToString();
                 myCost = Regex.Replace(myCost, @"[^\d+\.\d*]", "");
                 if (myCost != "")
                     this.cost = Convert.ToDouble(myCost);
@@ -116,6 +116,7 @@ namespace ISSISA_Library
                 this.last_inv = Convert.ToDateTime(last_inv);
             if (serial_number != Convert.DBNull)
                 this.serial_number = Convert.ToString(serial_number);
+            fats_serial_number = serial_number_per_fats != Convert.DBNull ? Convert.ToString(serial_number_per_fats) : "";
             if (fats_owner != Convert.DBNull)
                 this.fats_owner = Convert.ToString(fats_owner);
             if (notes != Convert.DBNull)
@@ -127,9 +128,9 @@ namespace ISSISA_Library
         public asset(object asset_number, object description, object model, object location,
             object serial_number, object room_per_advantage, object asset_type, object fats_serial_number,
             object fats_owner, object physical_location, object room_per_fats, object last_inv,
-            object hostname, object ip_address): this()
+            object hostname, object ip_address) : this()
         {
-            
+
             //Make sure the object params are not null then convert them into specified data type
             if (asset_number != Convert.DBNull)
                 this.asset_number = Convert.ToString(asset_number);
@@ -169,6 +170,7 @@ namespace ISSISA_Library
         public asset(asset a)
         {
             asset_number = a.asset_number;
+            fats_serial_number = a.fats_serial_number;
             missing = a.missing;
             cost = a.cost;
             last_inv = a.last_inv;
@@ -194,7 +196,7 @@ namespace ISSISA_Library
             room_number = a.room_number;
             found = a.found;
             children = new List<string>();
-            foreach (string c in a.children)
+            foreach (var c in a.children)
                 children.Add(c);
             master = a.master;
         }
@@ -202,39 +204,33 @@ namespace ISSISA_Library
         //for debugging only
         public string output()
         {
-
-            return (string.Format(@"Asset #: {0} 
-    Missing: {1} 
-    ISS Division: {2} 
-    Description: {3} 
-    Model: {4}                        
-    Asset Type: {5} 
-    Location: {6}  
-    Physical Location: {7}                       
-    Room Per Fats: {8} 
-    Room Per Advantage: {9} 
-    Cost: {10} 
-    Last Inv: {11}                       
-    Serial Number: {12} 
-    FATS Owner: {13} 
-    Notes: {14} 
-    Status: {15}                        
-    Device Name: {16} 
-    Mac Address: {17}
-    IP Address: {18}
-    Hostname: {19}
-    Firmware {20} 
-    Controller Name: {21}
-    Source: {22}
-    Contact: {23}
-    Last Scanned: {24}
-    Room Number: {25}
-    Found: {26}", asset_number, missing.ToString(), iss_division,
-                                                                      description, model, asset_type, location,
-                                                                      physical_location, room_per_advantage, room_per_fats,
-                                                                      cost, last_inv.ToString(), serial_number, fats_owner, notes,
-                                                                       status, device_name, mac_address, ip_address, hostname,
-                                                                       firmware, controller_name, source, contact, last_scanned, room_number, found));
+            return ($@"Asset #: {asset_number} 
+    Missing: {missing.ToString()} 
+    ISS Division: {iss_division} 
+    Description: {description} 
+    Model: {model}                        
+    Asset Type: {asset_type} 
+    Location: {location}  
+    Physical Location: {physical_location}                       
+    Room Per Fats: {room_per_advantage} 
+    Room Per Advantage: {room_per_fats} 
+    Cost: {cost} 
+    Last Inv: {last_inv.ToString()}                       
+    Serial Number: {serial_number} 
+    FATS Owner: {fats_owner} 
+    Notes: {notes} 
+    Status: {status}                        
+    Device Name: {device_name} 
+    Mac Address: {mac_address}
+    IP Address: {ip_address}
+    Hostname: {hostname}
+    Firmware {firmware} 
+    Controller Name: {controller_name}
+    Source: {source}
+    Contact: {contact}
+    Last Scanned: {last_scanned}
+    Room Number: {room_number}
+    Found: {found}");
 
         }
 
