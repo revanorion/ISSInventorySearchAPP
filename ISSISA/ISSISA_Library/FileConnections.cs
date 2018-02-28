@@ -76,7 +76,8 @@ namespace ISSISA_Library
         //calling funcitons: import_data       
         public void open_fiscal_book()
         {
-            var year = fiscal_book_address.Substring(3, 4);
+            //var year = fiscal_book_address.Substring(3, 4);
+            var year = fiscal_book_address.Substring(fiscal_book_address.IndexOf("FY ", StringComparison.Ordinal)+3, 4);
             var sheetName = "ISS Assets Inventory " + year;
             var con = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + _fiscal_book_address.path + ";Extended Properties=\"Excel 12.0 Xml;HDR=NO;IMEX=1;\"");
             con.Open();
@@ -361,6 +362,13 @@ namespace ISSISA_Library
                                 a.serial_number = parts.ElementAt(5);
                                 a.children = new List<string> { parts.ElementAt(7) };
                                 break;
+                            case FileType.SwitchSerialNoReportForInventory:
+                                a.ip_address = parts.ElementAt(0);
+                                a.device_name = parts.ElementAt(1);
+                                a.description = parts.ElementAt(2);
+                                a.status = parts.ElementAt(4);
+                                a.serial_number = parts.ElementAt(5);
+                                break;
                             //Wireless_APs_Yearly_Inventory_Report
                             case FileType.WirelessAPsYearlyInventoryReport:
                                 a.device_name = parts.ElementAt(0);
@@ -409,7 +417,8 @@ namespace ISSISA_Library
             DetailedRouterReportYearlyInventory,
             GbicTransceiver,
             SwitchRouterInventorySerialNumber,
-            WirelessAPsYearlyInventoryReport
+            WirelessAPsYearlyInventoryReport,
+            SwitchSerialNoReportForInventory
         }
 
 
@@ -450,6 +459,8 @@ namespace ISSISA_Library
                         open_csv_file(x, FileType.GbicTransceiver, "DeviceIP Address");
                     else if (x.name.Contains("Switchrouterinventoryserialnumber"))
                         open_csv_file(x, FileType.SwitchRouterInventorySerialNumber, "Device Name");
+                    else if (x.name.Contains("Switch_Serial_No._report_for_Inventory"))
+                        open_csv_file(x, FileType.SwitchSerialNoReportForInventory, "DeviceIP Address");
                     else if (x.name.Contains("Wireless_APs_Yearly_Inventory_Report"))
                         open_csv_file(x, FileType.WirelessAPsYearlyInventoryReport, "AP Name");
                     else
