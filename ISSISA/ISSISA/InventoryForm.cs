@@ -288,7 +288,8 @@ Dump
 LMS switch and Router report
 Detailed_Router_Report_-_Yearly_Inventory
 Detailed_Switch_Report_-_Yearly_Inventory
-LMS show Inventory raw");
+LMS show Inventory raw
+Switch_Serial_No._report_for_Inventory");
         }
     }
 }
