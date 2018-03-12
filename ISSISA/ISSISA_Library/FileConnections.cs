@@ -9,12 +9,14 @@ using System.Text.RegularExpressions;
 using Microsoft.VisualBasic.FileIO;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using ISSIAS_Library;
 
 namespace ISSISA_Library
 {
     public class FileConnections
     {
-
+        //This is the dbContext using Entity Framework to grab data
+        private readonly FATSContext _db;
         //This is used for exporting excel document
         public Excel.Application xlApp = new Excel.Application();
 
@@ -36,8 +38,6 @@ namespace ISSISA_Library
         public BindingList<asset> locationSerialValidate_devices = new BindingList<asset>();
         public BindingList<asset> serialRoomValidate_devices = new BindingList<asset>();
         public BindingList<asset> locationRoomSerialValidate_devices = new BindingList<asset>();
-
-
 
         //this private member holds the file properties for the fiscal book
         private fileNaming _fiscal_book_address = new fileNaming("No File Selected!");
@@ -68,7 +68,8 @@ namespace ISSISA_Library
 
         public FileConnections()
         {
-
+            _db = new FATSContext();
+            _db.Database.Connection.Open();
         }
 
         //fb example: FY 2016 20160114
@@ -998,12 +999,32 @@ namespace ISSISA_Library
 
             //then compare the data
             compare();
+
+            //compare Fats to Fiscal Book
+            //compareFats();
             //get the current date
             var date = DateTime.Now.ToString("yyyyMMdd");
 
             //add report to finished files list
             finished_files.Add(new fileNaming(date + " Inventory Report "));
             finished_files.Add(new fileNaming(date + " Missing Inventory Report "));
+        }
+
+
+        /// <summary>
+        /// work on getting functionality for fats working
+        /// </summary>
+        private void compareFats()
+        {
+            var wrongFatsData = new List<asset>();
+            foreach (var fbAsset in fb_assets.AsParallel().Where(x=>x.iss_division== "NETWORK"))
+            {
+                if(_db.FatsAsset.Any(x => x.AssetNumber == fbAsset.asset_number
+                                                                  && (x.LocationCode != fbAsset.location
+                                                                  || x.Room != fbAsset.room_per_fats)))
+                    wrongFatsData.Add(fbAsset);
+                
+            }
         }
 
 

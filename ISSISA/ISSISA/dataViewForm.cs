@@ -13,13 +13,12 @@ namespace ISSIAS
 {
     public partial class dataViewForm : Form
     {
-        private BindingSource assetData = new BindingSource();
-        private FileConnections files = new FileConnections();
+        private readonly BindingSource _assetData = new BindingSource();
 
         public dataViewForm()
         {
             InitializeComponent();
-            this.assetDataView.DataSource = assetData;
+            this.assetDataView.DataSource = _assetData;
         }
       
         //the switch will bind data to appropreate asset list. I for imported devices, B for Fiscal Book, 
@@ -27,34 +26,34 @@ namespace ISSIAS
         public dataViewForm(FileConnections a, char type)
         {
             InitializeComponent();
-            files=a;          
+            var files = a;          
             switch (type)
             {
                 case 'I':
-                    assetData.DataSource = files.imported_devices;
+                    _assetData.DataSource = files.imported_devices;
                     break;
                 case 'B':
-                    assetData.DataSource = files.fb_assets;
+                    _assetData.DataSource = files.fb_assets;
                     break;
                 case 'F':
-                    assetData.DataSource = files.found_devices;
+                    _assetData.DataSource = files.found_devices;
                     break;
                 case 'M':
-                    assetData.DataSource = files.missing_devices;
+                    _assetData.DataSource = files.missing_devices;
                     break;
                 case 'L':
-                    assetData.DataSource = files.locationValidate_devices;
+                    _assetData.DataSource = files.locationValidate_devices;
                     break;
                 case 'S':
-                    assetData.DataSource = files.serialValidate_devices;
+                    _assetData.DataSource = files.serialValidate_devices;
                     break;
                 case 'R':
-                    assetData.DataSource = files.roomValidate_devices;
+                    _assetData.DataSource = files.roomValidate_devices;
                     break;
             }
 
 
-            this.assetDataView.DataSource = assetData;
+            this.assetDataView.DataSource = _assetData;
         }
 
         private void assetDataView_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -67,7 +66,7 @@ namespace ISSIAS
             this.assetDataView.DataSource = null;
             this.assetDataView.Update();
             this.assetDataView.Refresh();
-            this.assetData.DataSource = assetData;
+            this._assetData.DataSource = assetData;
             this.assetDataView.DataSource = assetData;
         }
     }
