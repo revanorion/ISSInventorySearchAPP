@@ -69,7 +69,7 @@ namespace ISSISA_Library
         public FileConnections()
         {
             _db = new FATSContext();
-            _db.Database.Connection.Open();
+            //_db.Database.Connection.Open();
         }
 
         //fb example: FY 2016 20160114
@@ -377,6 +377,11 @@ namespace ISSISA_Library
                                 a.controller_name = parts.ElementAt(2);
                                 a.serial_number = parts.ElementAt(4);
                                 break;
+                            case FileType.BrocadeModuleReport:
+                                a.description = parts.ElementAt(0);
+                                a.serial_number = parts.ElementAt(1);
+                                a.device_name = parts.ElementAt(2);
+                                break;
                         }
                         //add source file value from what file it came from
                         a.source = x.name;
@@ -419,7 +424,8 @@ namespace ISSISA_Library
             GbicTransceiver,
             SwitchRouterInventorySerialNumber,
             WirelessAPsYearlyInventoryReport,
-            SwitchSerialNoReportForInventory
+            SwitchSerialNoReportForInventory,
+            BrocadeModuleReport
         }
 
 
@@ -456,7 +462,7 @@ namespace ISSISA_Library
                         open_csv_file(x, FileType.DeviceTypeUps);
                     else if (x.name.Contains("Detailed_Router_Report_-_Yearly_Inventory") || x.name.Contains("Detailed_Switch_Report_-_Yearly_Inventory"))
                         open_csv_file(x, FileType.DetailedRouterReportYearlyInventory, "Product Series");
-                    else if (x.name.Contains("GBIC_Transceiver"))
+                    else if (x.name.Contains("GBIC"))
                         open_csv_file(x, FileType.GbicTransceiver, "DeviceIP Address");
                     else if (x.name.Contains("Switchrouterinventoryserialnumber"))
                         open_csv_file(x, FileType.SwitchRouterInventorySerialNumber, "Device Name");
@@ -464,6 +470,8 @@ namespace ISSISA_Library
                         open_csv_file(x, FileType.SwitchSerialNoReportForInventory, "DeviceIP Address");
                     else if (x.name.Contains("Wireless_APs_Yearly_Inventory_Report"))
                         open_csv_file(x, FileType.WirelessAPsYearlyInventoryReport, "AP Name");
+                    else if (x.name.Contains("Brocade Module Report"))
+                        open_csv_file(x, FileType.BrocadeModuleReport, "Description");
                     else
                         throw new NotSupportedException();
                     break;
@@ -476,7 +484,7 @@ namespace ISSISA_Library
                         open_text_failedLMS(x);
                     else if (x.name.Contains("Brocade"))
                         open_text_Brocade(x);
-                    else if (x.name.Contains("LMS show Inventory"))
+                    else if (x.name.ToLower().Contains("lms show"))
                         open_text_LMS_show_inv(x);
                     break;
                 default:
@@ -512,6 +520,7 @@ namespace ISSISA_Library
                     imported_devices.Add(a);
                 }
             }
+
         }
 
         private void open_text_failedLMS(fileNaming x)
@@ -890,13 +899,21 @@ namespace ISSISA_Library
             //found_devices = fb_assets;
 
             //loops through each asset in list
-
+            var serialsOnly = fb_assets.Where(f => !string.IsNullOrEmpty(f.serial_number)).ToList();
+            var fatsSerials = fb_assets.Where(f => !string.IsNullOrEmpty(f.fats_serial_number)).ToList();
 
             foreach (var a in imported_devices)
             {
                 //grab the asset from fiscal book that has matching serials from imported device data
 
-                var existingAsset = fb_assets.AsParallel().FirstOrDefault(x => x.serial_number.Contains(a.serial_number) || x.fats_serial_number.Contains(a.serial_number));
+               
+
+
+                var existingAsset = serialsOnly.AsParallel()
+                                        .FirstOrDefault(x => x.serial_number.Contains(a.serial_number)) 
+                                    ?? fatsSerials.AsParallel()
+                                        .FirstOrDefault(x => x.fats_serial_number.Contains(a.serial_number));
+
                 if (existingAsset != null)
                 {
                     var found = new asset(existingAsset);
