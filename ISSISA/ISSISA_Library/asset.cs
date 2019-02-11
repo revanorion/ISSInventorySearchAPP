@@ -84,9 +84,10 @@ namespace ISSISA_Library
             object serial_number, object serial_number_per_fats, object fats_owner, object notes)
         {
             //Make sure the object params are not null then convert them into specified data type
+            DateTime outDate;
             if (asset_number != Convert.DBNull)
                 this.asset_number = Convert.ToString(asset_number);
-            if (missing != Convert.DBNull)
+            if (missing != Convert.DBNull && DateTime.TryParse(missing.ToString(), out outDate))
                 this.missing = Convert.ToDateTime(missing);
             if (iss_division != Convert.DBNull)
                 this.iss_division = Convert.ToString(iss_division);
