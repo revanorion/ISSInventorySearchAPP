@@ -10,6 +10,7 @@ using Microsoft.VisualBasic.FileIO;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using ISSIAS_Library;
+using OfficeOpenXml;
 
 namespace ISSISA_Library
 {
@@ -30,6 +31,11 @@ namespace ISSISA_Library
         public BindingList<asset> imported_devices = new BindingList<asset>();
         public BindingList<asset> found_devices = new BindingList<asset>();
         public BindingList<asset> missing_devices = new BindingList<asset>();
+
+        public List<asset> MissingAssets => fb_assets.Where(asset =>
+            found_devices.All(found => found.asset_number != asset.asset_number)).ToList();
+
+
 
         public BindingList<asset> locationValidate_devices = new BindingList<asset>();
         public BindingList<asset> serialValidate_devices = new BindingList<asset>();
@@ -78,7 +84,7 @@ namespace ISSISA_Library
         public void open_fiscal_book()
         {
             //var year = fiscal_book_address.Substring(3, 4);
-            var year = fiscal_book_address.Substring(fiscal_book_address.IndexOf("FY ", StringComparison.Ordinal)+3, 4);
+            var year = fiscal_book_address.Substring(fiscal_book_address.IndexOf("FY ", StringComparison.Ordinal) + 3, 4);
             var sheetName = "ISS Assets Inventory " + year;
             var con = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + _fiscal_book_address.path + ";Extended Properties=\"Excel 12.0 Xml;HDR=NO;IMEX=1;\"");
             con.Open();
@@ -350,9 +356,9 @@ namespace ISSISA_Library
                                 var index = parts.ElementAt(3).IndexOf("RELEASE SOFTWARE");
                                 a.description = index != -1 ? parts.ElementAt(3).Substring(0, index - 2) : parts.ElementAt(3);
                                 a.description.Replace(System.Environment.NewLine, "");
-                                a.physical_location = parts.ElementAt(4);
-                                a.contact = parts.ElementAt(5);
-                                a.serial_number = parts.ElementAt(6);
+                                a.physical_location = parts.ElementAt(5);
+                                a.contact = parts.ElementAt(6);
+                                a.serial_number = parts.ElementAt(7);
                                 break;
                             //Switchrouterinventoryserialnumber
                             case FileType.SwitchRouterInventorySerialNumber:
@@ -468,7 +474,7 @@ namespace ISSISA_Library
                         open_csv_file(x, FileType.SwitchRouterInventorySerialNumber, "Device Name");
                     else if (x.name.Contains("Switch_Serial_No._report_for_Inventory"))
                         open_csv_file(x, FileType.SwitchSerialNoReportForInventory, "DeviceIP Address");
-                    else if (x.name.Contains("Wireless_APs_Yearly_Inventory_Report"))
+                    else if (x.name.Contains("Wireless APs"))
                         open_csv_file(x, FileType.WirelessAPsYearlyInventoryReport, "AP Name");
                     else if (x.name.Contains("Brocade Module Report"))
                         open_csv_file(x, FileType.BrocadeModuleReport, "Description");
@@ -478,6 +484,8 @@ namespace ISSISA_Library
                 case ".txt":
                     if (x.name.Contains("Brocade transceivers"))
                         open_txt_brocade_transceivers(x);
+                    else if (x.name.Contains("netscraper"))
+                        OpenNetscraperDump(x);
                     else if (x.name.Contains("Cisco Dump"))
                         open_text_dump(x);
                     else if (x.name.Contains("failed inventory collectionLMS"))
@@ -733,6 +741,80 @@ namespace ISSISA_Library
             }
         }
 
+
+        private void OpenNetscraperDump(fileNaming x)
+        {
+            var validSn = new[]
+            {
+                "SN:",
+                "Serial Number:",
+                "Serial Number :",
+                "Serial#:",
+                "Daughterboard serial number     :"
+            };
+
+
+
+            using (var sr = new StreamReader(x.path))
+            {
+                string line;
+                var deviceName = "";
+                var description = "";
+                while ((line = sr.ReadLine()) != null)
+                {
+                    if (string.IsNullOrEmpty(line)) continue;
+
+
+                    if (line.Last() == '#' && line.Count(c => c=='#')==1)
+                    {
+                        deviceName = line.Split('#')[0];
+                        description = "";
+                       
+                        continue;
+                    }
+                    if (line.Contains("DESCR:"))
+                    {
+                        var indexOf = line.IndexOf("DESCR:", StringComparison.Ordinal) + 6;
+                        var desc = line.Substring(indexOf).Trim().Trim('"');
+                        if (string.IsNullOrEmpty(desc)) continue;
+                        description = desc;
+                    }
+                    var sn = "";
+                    var notes = "";
+                    foreach (var s in validSn)
+                    {
+                        if (!line.Contains(s)) continue;
+                        var indexOf = line.IndexOf(s, StringComparison.Ordinal) + s.Length;
+                        sn = line.Substring(indexOf).Trim();
+                        var trimIndex = sn.IndexOf(' ');
+                        if (trimIndex > 0)
+                        {
+                            notes = sn.Substring(trimIndex).Trim();
+                            sn = sn.Substring(0, trimIndex);
+                        }
+                        break;
+                    }
+
+
+                    if (string.IsNullOrEmpty(sn) || sn == "N/A" || sn == "0x") continue;
+                    if (imported_devices.Any(serial => serial.serial_number == sn)) continue;
+
+
+                    var asset = new asset
+                    {
+                        serial_number = sn,
+                        description = description,
+                        device_name = deviceName,
+                        source = x.name,
+                        notes = notes
+                    };
+
+                    imported_devices.Add(asset);
+                }
+                sr.Close();
+            }
+        }
+
         private void open_txt_brocade_transceivers(fileNaming x)
         {
             using (var sr = new StreamReader(x.path))
@@ -840,7 +922,7 @@ namespace ISSISA_Library
             //Parallel.ForEach(exportList, a =>
             //{
 
-            foreach (var a in exportList)
+            foreach (var a in exportList.AsParallel())
             {
                 ws.Cells[rows, columns++] = a.asset_number;
                 ws.Cells[rows, columns++] = a.missing.ToString();
@@ -859,7 +941,7 @@ namespace ISSISA_Library
                 ws.Cells[rows, columns++] = a.fats_serial_number;
                 ws.Cells[rows, columns++] = a.master;
                 ws.Cells[rows, columns] = "";
-                foreach (var child in a.children)
+                foreach (var child in a.children.AsParallel())
                 {
                     var cellValue = (string)(ws.Cells[rows, columns] as Excel.Range).Value;
                     ws.Cells[rows, columns] = cellValue + child + ";";
@@ -889,6 +971,93 @@ namespace ISSISA_Library
             open_excel_file(x);
         }
 
+        public void WriteToExcel(string x, IEnumerable<asset> exportList)
+        {
+            byte[] file;
+
+            using (var xlPackage = new ExcelPackage())
+            {
+                xlPackage.Workbook.Properties.Title = x;
+                var ws = xlPackage.Workbook.Worksheets.Add("Sheet1");
+                int rows = 1, columns = 1;
+                ws.Cells[rows, columns++].Value = "Asset #";
+                ws.Cells[rows, columns++].Value = "Missing " + fiscal_book_address.Substring(3, 4);
+                ws.Cells[rows, columns++].Value = "ISS Divison";
+                ws.Cells[rows, columns++].Value = "Description";
+                ws.Cells[rows, columns++].Value = "Model";
+                ws.Cells[rows, columns++].Value = "Asset Type";
+                ws.Cells[rows, columns++].Value = "Location";
+                ws.Cells[rows, columns++].Value = "Physical Location";
+                ws.Cells[rows, columns++].Value = "Room Per Advantage #";
+                ws.Cells[rows, columns++].Value = "Room Per FATS";
+                ws.Cells[rows, columns++].Value = "Room Number";
+                ws.Cells[rows, columns++].Value = "Cost";
+                ws.Cells[rows, columns++].Value = "Last Inv";
+                ws.Cells[rows, columns++].Value = "Serial #";
+                ws.Cells[rows, columns++].Value = "Serial # Per FATS";
+                ws.Cells[rows, columns++].Value = "Master SN";
+                ws.Cells[rows, columns++].Value = "Children SN";
+                ws.Cells[rows, columns++].Value = "FATS Owner";
+                ws.Cells[rows, columns++].Value = "Notes";
+                ws.Cells[rows, columns++].Value = "Status";
+                ws.Cells[rows, columns++].Value = "Device Name";
+                ws.Cells[rows, columns++].Value = "Mac Address";
+                ws.Cells[rows, columns++].Value = "IP Address";
+                ws.Cells[rows, columns++].Value = "Hostname";
+                ws.Cells[rows, columns++].Value = "Controller Name";
+                ws.Cells[rows, columns++].Value = "Firmware";
+                ws.Cells[rows, columns++].Value = "Contact";
+                ws.Cells[rows, columns++].Value = "Last Scanned";
+                ws.Cells[rows++, columns].Value = "Source";
+
+                columns = 1;
+                //write the data
+                //Parallel.ForEach(exportList, a =>
+                //{
+
+                foreach (var a in exportList.AsParallel())
+                {
+                    ws.Cells[rows, columns++].Value = a.asset_number;
+                    ws.Cells[rows, columns++].Value = a.missing.ToString();
+                    ws.Cells[rows, columns++].Value = a.iss_division;
+                    ws.Cells[rows, columns++].Value = a.description;
+                    ws.Cells[rows, columns++].Value = a.model;
+                    ws.Cells[rows, columns++].Value = a.asset_type;
+                    ws.Cells[rows, columns++].Value = a.location;
+                    ws.Cells[rows, columns++].Value = a.physical_location;
+                    ws.Cells[rows, columns++].Value = a.room_per_advantage;
+                    ws.Cells[rows, columns++].Value = a.room_per_fats;
+                    ws.Cells[rows, columns++].Value = a.room_number;
+                    ws.Cells[rows, columns++].Value = a.cost;
+                    ws.Cells[rows, columns++].Value = a.last_inv.ToString();
+                    ws.Cells[rows, columns++].Value = a.serial_number;
+                    ws.Cells[rows, columns++].Value = a.fats_serial_number;
+                    ws.Cells[rows, columns++].Value = a.master;
+                    ws.Cells[rows, columns].Value = "";
+                    foreach (var child in a.children.AsParallel())
+                    {
+                        var cellValue = (string)(ws.Cells[rows, columns] as Excel.Range).Value;
+                        ws.Cells[rows, columns].Value = cellValue + child + ";";
+                    }
+                    columns++;
+                    ws.Cells[rows, columns++].Value = a.fats_owner;
+                    ws.Cells[rows, columns++].Value = a.notes;
+                    ws.Cells[rows, columns++].Value = a.status;
+                    ws.Cells[rows, columns++].Value = a.device_name;
+                    ws.Cells[rows, columns++].Value = a.mac_address;
+                    ws.Cells[rows, columns++].Value = a.ip_address;
+                    ws.Cells[rows, columns++].Value = a.hostname;
+                    ws.Cells[rows, columns++].Value = a.controller_name;
+                    ws.Cells[rows, columns++].Value = a.firmware;
+                    ws.Cells[rows, columns++].Value = a.contact;
+                    ws.Cells[rows, columns++].Value = a.last_scanned;
+                    ws.Cells[rows++, columns].Value = a.source;
+                    columns = 1;
+                }
+                xlPackage.SaveAs(new FileInfo(x));
+            }
+        }
+
         //this function handles the comparison between imported devices and assets from fiscal book
         //calling functions: import_data
         public void compare()
@@ -906,11 +1075,11 @@ namespace ISSISA_Library
             {
                 //grab the asset from fiscal book that has matching serials from imported device data
 
-               
+
 
 
                 var existingAsset = serialsOnly.AsParallel()
-                                        .FirstOrDefault(x => x.serial_number.Contains(a.serial_number)) 
+                                        .FirstOrDefault(x => x.serial_number.Contains(a.serial_number))
                                     ?? fatsSerials.AsParallel()
                                         .FirstOrDefault(x => x.fats_serial_number.Contains(a.serial_number));
 
@@ -1025,6 +1194,7 @@ namespace ISSISA_Library
             //add report to finished files list
             finished_files.Add(new fileNaming(date + " Inventory Report "));
             finished_files.Add(new fileNaming(date + " Missing Inventory Report "));
+            finished_files.Add(new fileNaming(date + " Missing Asset Report "));
         }
 
 
@@ -1034,13 +1204,13 @@ namespace ISSISA_Library
         private void compareFats()
         {
             var wrongFatsData = new List<asset>();
-            foreach (var fbAsset in fb_assets.AsParallel().Where(x=>x.iss_division== "NETWORK"))
+            foreach (var fbAsset in fb_assets.AsParallel().Where(x => x.iss_division == "NETWORK"))
             {
-                if(_db.FatsAsset.Any(x => x.AssetNumber == fbAsset.asset_number
-                                                                  && (x.LocationCode != fbAsset.location
-                                                                  || x.Room != fbAsset.room_per_fats)))
+                if (_db.FatsAsset.Any(x => x.AssetNumber == fbAsset.asset_number
+                                                                   && (x.LocationCode != fbAsset.location
+                                                                   || x.Room != fbAsset.room_per_fats)))
                     wrongFatsData.Add(fbAsset);
-                
+
             }
         }
 
