@@ -242,7 +242,8 @@ namespace ISSISA
 
                     try
                     {
-                        _files.write_to_excel(_sfd.FileName, _files.found_devices);
+                        //_files.write_to_excel(_sfd.FileName, _files.found_devices);
+                        _files.WriteToExcel(_sfd.FileName, _files.found_devices);
                     }
                     catch (Exception ex)
                     {
@@ -256,7 +257,23 @@ namespace ISSISA
 
                     try
                     {
-                        _files.write_to_excel(_sfd.FileName, _files.missing_devices);
+                       // _files.write_to_excel(_sfd.FileName, _files.missing_devices);
+                        _files.WriteToExcel(_sfd.FileName, _files.missing_devices);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+                }
+                //This save process is for missing assets
+                _sfd.FileName = _files.finished_files[2].name;
+                if (_sfd.ShowDialog() == DialogResult.OK)
+                {
+
+                    try
+                    {
+                        // _files.write_to_excel(_sfd.FileName, _files.missing_devices);
+                        _files.WriteToExcel(_sfd.FileName, _files.MissingAssets);
                     }
                     catch (Exception ex)
                     {
