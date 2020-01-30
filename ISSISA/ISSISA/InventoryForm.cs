@@ -33,23 +33,23 @@ namespace ISSISA
         public InventoryForm(FileConnections a)
         {
             _files = a;
-            init();
+            Init();
         }
 
         public InventoryForm()
         {
-            init();
+            Init();
         }
 
 
-        private void init()
+        private void Init()
         {
             InitializeComponent();
 
             //binds the data source to the list
             filesSelectedBinding.DataSource = _files.files;
             files_selected_list.DataSource = filesSelectedBinding;
-            files_selected_list.DisplayMember = "name";		//only takes 1 property
+            files_selected_list.DisplayMember = "name"; //only takes 1 property
             files_selected_list.ValueMember = "name";
 
             fiscal_book_label.Text = _files.fiscal_book_address;
@@ -57,7 +57,7 @@ namespace ISSISA
             //binds the data source to the list
             finishedFilesBinding.DataSource = _files.finished_files;
             finished_files_list.DataSource = finishedFilesBinding;
-            finished_files_list.DisplayMember = "name";		//only takes 1 property
+            finished_files_list.DisplayMember = "name"; //only takes 1 property
             finished_files_list.ValueMember = "name";
 
             MaximizeBox = false;
@@ -83,16 +83,15 @@ namespace ISSISA
         }
 
 
-
         private void InventoryForm_Load(object sender, EventArgs e)
         {
-
         }
 
         //event handeler for add file button. dialog will appear for user to select files 
         private void add_file_button_Click(object sender, EventArgs e)
         {
-            _ofd.Filter = @"CSV Files (.csv)|*.csv|Excel 97-2003 (.xls)|*.xls|Text Files (.txt)|*.txt|All Files (*.*)|*.*";
+            _ofd.Filter =
+                @"CSV Files (.csv)|*.csv|Excel 97-2003 (.xls)|*.xls|Text Files (.txt)|*.txt|All Files (*.*)|*.*";
             _ofd.FilterIndex = 1;
             _ofd.Multiselect = true;
             if (_ofd.ShowDialog() != DialogResult.OK) return;
@@ -100,8 +99,8 @@ namespace ISSISA
             {
                 _files.add_file(x);
             }
-            filesSelectedBinding.ResetBindings(false);
 
+            filesSelectedBinding.ResetBindings(false);
         }
 
         //event handeler for remove file button. will remove the selected file from the list
@@ -109,7 +108,7 @@ namespace ISSISA
         {
             if (files_selected_list.SelectedItem != null)
             {
-                var x = ((fileNaming)files_selected_list.SelectedItem);
+                var x = ((fileNaming) files_selected_list.SelectedItem);
                 _files.remove_file(x);
                 filesSelectedBinding.ResetBindings(false);
                 _files.finished_files.Clear();
@@ -198,13 +197,13 @@ namespace ISSISA
             {
                 MessageBox.Show("Unhandled Exception!");
             }
+
             Cursor.Current = Cursors.Default;
         }
 
         //event handeler for save file button. will take the data from compared list and write it to an excel file
         private void save_files_button_Click(object sender, EventArgs e)
         {
-
             /*
             This needs a dialog for saving missing files
 
@@ -230,7 +229,6 @@ namespace ISSISA
                     {
                         MessageBox.Show(ex.Message);
                     }
-
                 }
             }
             else if (_files.found_devices != null)
@@ -239,7 +237,6 @@ namespace ISSISA
                 _sfd.FileName = _files.finished_files[0].name;
                 if (_sfd.ShowDialog() == DialogResult.OK)
                 {
-
                     try
                     {
                         //_files.write_to_excel(_sfd.FileName, _files.found_devices);
@@ -250,14 +247,14 @@ namespace ISSISA
                         MessageBox.Show(ex.Message);
                     }
                 }
+
                 //This save process is for missing devices
                 _sfd.FileName = _files.finished_files[1].name;
                 if (_sfd.ShowDialog() == DialogResult.OK)
                 {
-
                     try
                     {
-                       // _files.write_to_excel(_sfd.FileName, _files.missing_devices);
+                        // _files.write_to_excel(_sfd.FileName, _files.missing_devices);
                         _files.WriteToExcel(_sfd.FileName, _files.missing_devices);
                     }
                     catch (Exception ex)
@@ -265,11 +262,11 @@ namespace ISSISA
                         MessageBox.Show(ex.Message);
                     }
                 }
+
                 //This save process is for missing assets
                 _sfd.FileName = _files.finished_files[2].name;
                 if (_sfd.ShowDialog() == DialogResult.OK)
                 {
-
                     try
                     {
                         // _files.write_to_excel(_sfd.FileName, _files.missing_devices);
@@ -286,12 +283,14 @@ namespace ISSISA
             {
                 MessageBox.Show("No process ran or no devices found!");
             }
+
             Cursor.Current = Cursors.Default;
         }
 
         private void displayHelp(object sender, MouseEventArgs e)
         {
-            MessageBox.Show(@"Selected files must be csv, xls, or txt and must contain in the file name any of the values below.
+            MessageBox.Show(
+                @"Selected files must be csv, xls, or txt and must contain in the file name any of the values below.
 
 Tropos
 Wireless_Controllers                

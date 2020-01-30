@@ -18,15 +18,15 @@ namespace ISSIAS
         public dataViewForm()
         {
             InitializeComponent();
-            this.assetDataView.DataSource = _assetData;
+            assetDataView.DataSource = _assetData;
         }
-      
+
         //the switch will bind data to appropreate asset list. I for imported devices, B for Fiscal Book, 
         //F for found devices, M for missing devices.
         public dataViewForm(FileConnections a, char type)
         {
             InitializeComponent();
-            var files = a;          
+            var files = a;
             switch (type)
             {
                 case 'I':
@@ -53,21 +53,20 @@ namespace ISSIAS
             }
 
 
-            this.assetDataView.DataSource = _assetData;
+            assetDataView.DataSource = _assetData;
         }
 
         private void assetDataView_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-
         }
 
-        public void refresh(BindingList<asset> assetData)
+        public void Refresh(BindingList<asset> assetData)
         {
-            this.assetDataView.DataSource = null;
-            this.assetDataView.Update();
-            this.assetDataView.Refresh();
-            this._assetData.DataSource = assetData;
-            this.assetDataView.DataSource = assetData;
+            assetDataView.DataSource = null;
+            assetDataView.Update();
+            assetDataView.Refresh();
+            _assetData.DataSource = assetData;
+            assetDataView.DataSource = assetData;
         }
     }
 }
