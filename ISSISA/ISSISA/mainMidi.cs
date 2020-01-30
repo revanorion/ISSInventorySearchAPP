@@ -49,13 +49,13 @@ namespace ISSIAS
             IAS_serialValidateDataView.MdiParent = this;
             IAS_roomValidateDataView.MdiParent = this;
 
-            foreach (Control ctrl in this.Controls)
+            foreach (Control ctrl in Controls)
             {
                 if (ctrl is MdiClient)
                 {
                     ctrl.BackColor = Color.Cornsilk;
                 }
-                else if (ctrl is System.Windows.Forms.PictureBox)
+                else if (ctrl is PictureBox)
                 {
                     ctrl.BackColor = Color.Cornsilk;
                 }
@@ -135,7 +135,7 @@ namespace ISSIAS
                 IAS_locationValidateDataView.MdiParent = this;
             }
             hideChildren();
-            IAS_locationValidateDataView.refresh(_files.locationValidate_devices);
+            IAS_locationValidateDataView.Refresh(_files.locationValidate_devices);
             IAS_locationValidateDataView.Show();
 
         }
@@ -147,7 +147,7 @@ namespace ISSIAS
                 IAS_serialValidateDataView.MdiParent = this;
             }
             hideChildren();
-            IAS_serialValidateDataView.refresh(_files.serialValidate_devices);
+            IAS_serialValidateDataView.Refresh(_files.serialValidate_devices);
             IAS_serialValidateDataView.Show();
         }
         private void viewRoomValidateToolStripMenuItem_Click(object sender, EventArgs e)
@@ -159,14 +159,14 @@ namespace ISSIAS
                 IAS_roomValidateDataView.MdiParent = this;
             }
             hideChildren();
-            IAS_roomValidateDataView.refresh(_files.roomValidate_devices);
+            IAS_roomValidateDataView.Refresh(_files.roomValidate_devices);
             IAS_roomValidateDataView.Show();
         }
 
 
         private void hideChildren()
         {
-            foreach (Form i in this.MdiChildren)
+            foreach (Form i in MdiChildren)
                 i.Hide();
         }
 
