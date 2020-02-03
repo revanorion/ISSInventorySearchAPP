@@ -493,7 +493,7 @@ namespace ISSISA_Library
                         open_text_failedLMS(x);
                     else if (x.name.Contains("Brocade"))
                         open_text_Brocade(x);
-                    else if (x.name.ToLower().Contains("lms show"))
+                    else if (x.name.ToLower().Contains("inv raw"))
                         open_text_LMS_show_inv(x);
                     break;
                 default:
