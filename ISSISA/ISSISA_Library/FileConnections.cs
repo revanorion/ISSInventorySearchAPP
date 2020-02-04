@@ -424,6 +424,7 @@ namespace ISSISA_Library
             WirelessAPsYearlyInventoryReport,
             SwitchSerialNoReportForInventory,
             BrocadeModuleReport,
+            BrocadeWired,
             TMSInventory
         }
 
@@ -433,7 +434,8 @@ namespace ISSISA_Library
             switch (x.type)
             {
                 case ".xlsx":
-
+                    if (x.name.Contains("Brocade Wired"))
+                        open_xlsx_file(x, FileType.BrocadeWired, "Product Status");
                     break;
                 case ".xls":
                     if (x.name.Contains("TMS-Inventory"))
@@ -441,7 +443,7 @@ namespace ISSISA_Library
                     else if (x.name.Contains("GBIC"))
                         open_xls_file(x, FileType.GbicTransceiver, "DeviceIP Address");
                     else if (x.name.Contains("Detailed_Router_Report_-_Yearly_Inventory") ||
-                             x.name.Contains("Detailed_Switch_Report_-_Yearly_Inventory")||
+                             x.name.Contains("Detailed_Switch_Report_-_Yearly_Inventory") ||
                              x.name.Contains("Detailed Router") ||
                              x.name.Contains("Detailed Switch"))
                         open_xls_file(x, FileType.DetailedRouterReportYearlyInventory, "Product Series");
@@ -675,9 +677,10 @@ namespace ISSISA_Library
                                 break;
                             case FileType.DetailedRouterReportYearlyInventory:
                                 a.model = Convert.ToString(cells[0]);
-                                a.device_name =  Convert.ToString(cells[1]);
-                                a.ip_address =  Convert.ToString(cells[2]);
-                                var index =  Convert.ToString(cells[4]).IndexOf("RELEASE SOFTWARE", StringComparison.Ordinal);
+                                a.device_name = Convert.ToString(cells[1]);
+                                a.ip_address = Convert.ToString(cells[2]);
+                                var index = Convert.ToString(cells[4])
+                                    .IndexOf("RELEASE SOFTWARE", StringComparison.Ordinal);
                                 a.description = index != -1
                                     ? Convert.ToString(cells[4]).Substring(0, index - 2)
                                     : Convert.ToString(cells[4]);
@@ -698,6 +701,72 @@ namespace ISSISA_Library
                 con.Close();
             }
         }
+
+        private void open_xlsx_file(fileNaming x, FileType xlsType, string skipUntil = null, string breakAt = null)
+        {
+            var ignore = !(skipUntil == null && breakAt == null);
+            //string sheetName;
+            //using (var con = new OleDbConnection(@"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + x.path +
+            //                                     @";Extended Properties=""Excel 8.0;HDR=YES;"""))
+            //{
+            //    con.Open();
+            //    var dtSchema = con.GetOleDbSchemaTable(OleDbSchemaGuid.Tables,
+            //        new object[] {null, null, null, "TABLE"});
+            //    sheetName = dtSchema.Rows[0].Field<string>("TABLE_NAME");
+            //    con.Close();
+            //}
+
+            var fi = new FileInfo(x.path);
+            using (var xlPackage = new ExcelPackage(fi))
+            {
+                var ws = xlPackage.Workbook.Worksheets[xlPackage.Workbook.Worksheets.First().Name];
+
+                for (var i = 1; i < ws.Dimension.End.Row; i++)
+                {
+                    var cells = ws.Cells[i, 1, i, ws.Dimension.End.Column];
+
+                    var result = cells.Where(c => c.Value != null)
+                        .Where(n => n.Value.ToString() == skipUntil).ToList();
+                    if (result.Count == 0 && ignore)
+                        continue;
+                    if (ignore)
+                        ignore = false;
+                    else
+                    {
+                        var multi = (cells.Value as object[,]);
+                        if (multi == null) continue;
+                        switch (xlsType)
+                        {
+                            case FileType.BrocadeWired:
+                                var serial = multi[0, 6] as string;
+                                if (string.IsNullOrEmpty(serial)) continue;
+                                var serials = Regex.Replace(serial, @"Unit \d - ", "");
+                                foreach (var s in serials.Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    var b = new asset
+                                    {
+                                        device_name = multi[0, 1] as string,
+                                        ip_address = multi[0, 4] as string,
+                                        asset_type = multi[0, 5] as string,
+                                        serial_number = s,
+                                        status = multi[0, 7] as string,
+                                        model = multi[0, 8] as string,
+                                        firmware = multi[0, 9] as string,
+                                        contact = multi[0, 10] as string,
+                                        location = multi[0, 11] as string,
+                                        last_scanned = multi[0, 12] as string,
+                                    };
+
+                                    imported_devices.Add(b);
+                                }
+
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+
 
         //this function handles importing data from a text file
         //calling functions: open_file
