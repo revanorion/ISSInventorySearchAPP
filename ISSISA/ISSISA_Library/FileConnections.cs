@@ -436,6 +436,10 @@ namespace ISSISA_Library
                 case ".xlsx":
                     if (x.name.Contains("Brocade Wired"))
                         open_xlsx_file(x, FileType.BrocadeWired, "Product Status");
+                    else if (x.name.Contains("Wireless APs"))
+                        open_xlsx_file(x, FileType.WirelessAPsYearlyInventoryReport, "AP Name");
+                    else if (x.name.Contains("Wireless_APs"))
+                        open_xlsx_file(x, FileType.WirelessAPsYearlyInventoryReport, "AP Name");
                     break;
                 case ".xls":
                     if (x.name.Contains("TMS-Inventory"))
@@ -743,7 +747,7 @@ namespace ISSISA_Library
                                 var serials = Regex.Replace(serial, @"Unit \d - ", "");
                                 foreach (var s in serials.Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries))
                                 {
-                                    var b = new asset
+                                    var brocadeAsset = new asset
                                     {
                                         device_name = multi[0, 1] as string,
                                         ip_address = multi[0, 4] as string,
@@ -755,10 +759,24 @@ namespace ISSISA_Library
                                         contact = multi[0, 10] as string,
                                         location = multi[0, 11] as string,
                                         last_scanned = multi[0, 12] as string,
+                                        source = x.name
                                     };
 
-                                    imported_devices.Add(b);
+                                    imported_devices.Add(brocadeAsset);
                                 }
+
+                                break;
+                            case FileType.WirelessAPsYearlyInventoryReport:
+                                var apAsset = new asset
+                                {
+                                    device_name = multi[0, 0] as string,
+                                    model = multi[0, 1] as string,
+                                    controller_name = multi[0, 2] as string,
+                                    serial_number = multi[0, 4] as string,
+                                    source = x.name
+                                };
+
+                                imported_devices.Add(apAsset);
 
                                 break;
                         }
