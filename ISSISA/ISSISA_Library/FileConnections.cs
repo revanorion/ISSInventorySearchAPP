@@ -440,6 +440,8 @@ namespace ISSISA_Library
                         open_xlsx_file(x, FileType.WirelessAPsYearlyInventoryReport, "AP Name");
                     else if (x.name.Contains("Wireless_APs"))
                         open_xlsx_file(x, FileType.WirelessAPsYearlyInventoryReport, "AP Name");
+                    else if (x.name.Contains("UPS"))
+                        open_xlsx_file(x, FileType.DeviceTypeUps);
                     break;
                 case ".xls":
                     if (x.name.Contains("TMS-Inventory"))
@@ -739,10 +741,11 @@ namespace ISSISA_Library
                     {
                         var multi = (cells.Value as object[,]);
                         if (multi == null) continue;
+                        string serial;
                         switch (xlsType)
                         {
                             case FileType.BrocadeWired:
-                                var serial = multi[0, 6] as string;
+                                serial = multi[0, 6] as string;
                                 if (string.IsNullOrEmpty(serial)) continue;
                                 var serials = Regex.Replace(serial, @"Unit \d - ", "");
                                 foreach (var s in serials.Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries))
@@ -778,6 +781,22 @@ namespace ISSISA_Library
 
                                 imported_devices.Add(apAsset);
 
+                                break;
+                            case FileType.DeviceTypeUps:
+                                serial = multi[0, 3] as string;
+                                if (string.IsNullOrEmpty(serial) || serial.Contains("Serial Number"))
+                                    continue;
+                                var upsAsset = new asset
+                                {
+                                    serial_number = serial,
+                                    ip_address = multi[0, 0] as string,
+                                    hostname = multi[0, 1] as string,
+                                    model = multi[0, 2] as string,
+                                    firmware = multi[0, 4] as string,
+                                    physical_location = $"{multi[0, 5] as string} {multi[0, 6] as string}",
+                                    source = x.name
+                                };
+                                imported_devices.Add(upsAsset);
                                 break;
                         }
                     }
