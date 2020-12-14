@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace ISSISA_Library
+namespace ISSIAS_Library
 {
     public class asset
     {
-
         //Properties found in Fiscal Book
         public string asset_number { get; set; }
         public DateTime missing { get; set; }
         public double cost { get; set; }
         public DateTime last_inv { get; set; }
-
+        public Image AssetBarcode { get; set; }
         public string serial_number { get; set; }
         public string fats_serial_number { get; set; }
         public string description { get; set; }
@@ -40,6 +42,9 @@ namespace ISSISA_Library
         public bool found { get; set; }
         public List<string> children { get; set; }
         public string master { get; set; }
+
+        [DisplayName("Children")]
+        public string childrenDisplay => children != null && children.Any() ? string.Join(";", children) : "";
 
         //Default constructor that sets up all the property fields.
         public asset()
@@ -84,9 +89,10 @@ namespace ISSISA_Library
             object serial_number, object serial_number_per_fats, object fats_owner, object notes)
         {
             //Make sure the object params are not null then convert them into specified data type
+            DateTime outDate;
             if (asset_number != Convert.DBNull)
                 this.asset_number = Convert.ToString(asset_number);
-            if (missing != Convert.DBNull)
+            if (missing != Convert.DBNull && DateTime.TryParse(missing.ToString(), out outDate))
                 this.missing = Convert.ToDateTime(missing);
             if (iss_division != Convert.DBNull)
                 this.iss_division = Convert.ToString(iss_division);
@@ -123,6 +129,11 @@ namespace ISSISA_Library
                 this.notes = Convert.ToString(notes);
             found = false;
             children = new List<string>();
+
+            if (!string.IsNullOrEmpty(this.asset_number) && this.asset_number.Length > 3)
+            {
+                AddBarcode(this);
+            }
         }
         //This constructor is used when getting data from an excel .xlsx review book
         public asset(object asset_number, object description, object model, object location,
@@ -166,6 +177,11 @@ namespace ISSISA_Library
                 this.ip_address = Convert.ToString(ip_address);
             found = false;
             children = new List<string>();
+
+            if (!string.IsNullOrEmpty(this.asset_number) && this.asset_number.Length > 3)
+            {
+                AddBarcode(this);
+            }
         }
         public asset(asset a)
         {
@@ -199,41 +215,16 @@ namespace ISSISA_Library
             foreach (var c in a.children)
                 children.Add(c);
             master = a.master;
+
+            if (!string.IsNullOrEmpty(asset_number) && asset_number.Length > 3)
+            {
+                AddBarcode(this);
+            }
         }
 
-        //for debugging only
-        public string output()
+        private static void AddBarcode(asset asset)
         {
-            return ($@"Asset #: {asset_number} 
-    Missing: {missing.ToString()} 
-    ISS Division: {iss_division} 
-    Description: {description} 
-    Model: {model}                        
-    Asset Type: {asset_type} 
-    Location: {location}  
-    Physical Location: {physical_location}                       
-    Room Per Fats: {room_per_advantage} 
-    Room Per Advantage: {room_per_fats} 
-    Cost: {cost} 
-    Last Inv: {last_inv.ToString()}                       
-    Serial Number: {serial_number} 
-    FATS Owner: {fats_owner} 
-    Notes: {notes} 
-    Status: {status}                        
-    Device Name: {device_name} 
-    Mac Address: {mac_address}
-    IP Address: {ip_address}
-    Hostname: {hostname}
-    Firmware {firmware} 
-    Controller Name: {controller_name}
-    Source: {source}
-    Contact: {contact}
-    Last Scanned: {last_scanned}
-    Room Number: {room_number}
-    Found: {found}");
-
+            asset.AssetBarcode = GenCode128.Code128Rendering.MakeBarcodeImage(asset.asset_number, 1, true);
         }
-
-
     }
 }

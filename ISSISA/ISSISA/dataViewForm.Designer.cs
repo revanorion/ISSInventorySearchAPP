@@ -28,36 +28,38 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(dataViewForm));
+            System.ComponentModel.ComponentResourceManager resources =
+                new System.ComponentModel.ComponentResourceManager(typeof(dataViewForm));
             this.assetDataView = new System.Windows.Forms.DataGridView();
-            ((System.ComponentModel.ISupportInitialize)(this.assetDataView)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.assetDataView)).BeginInit();
             this.SuspendLayout();
             // 
             // assetDataView
             // 
             this.assetDataView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.assetDataView.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
-            this.assetDataView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.assetDataView.ColumnHeadersHeightSizeMode =
+                System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.assetDataView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.assetDataView.Location = new System.Drawing.Point(0, 0);
             this.assetDataView.Name = "assetDataView";
             this.assetDataView.Size = new System.Drawing.Size(904, 508);
             this.assetDataView.TabIndex = 0;
-            this.assetDataView.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.assetDataView_CellContentClick);
+            this.assetDataView.CellContentClick +=
+                new System.Windows.Forms.DataGridViewCellEventHandler(this.assetDataView_CellContentClick);
             // 
             // dataViewForm
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
             this.ClientSize = new System.Drawing.Size(904, 508);
             this.Controls.Add(this.assetDataView);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
             this.Name = "dataViewForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "dataViewForm";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
-            ((System.ComponentModel.ISupportInitialize)(this.assetDataView)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.assetDataView)).EndInit();
             this.ResumeLayout(false);
-
         }
 
         #endregion
