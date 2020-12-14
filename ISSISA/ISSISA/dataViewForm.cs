@@ -1,5 +1,4 @@
-﻿using ISSISA_Library;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,67 +7,66 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ISSIAS_Library;
 
 namespace ISSIAS
 {
     public partial class dataViewForm : Form
     {
-        private BindingSource assetData = new BindingSource();
-        private FileConnections files = new FileConnections();
+        private readonly BindingSource _assetData = new BindingSource();
 
         public dataViewForm()
         {
             InitializeComponent();
-            this.assetDataView.DataSource = assetData;
+            assetDataView.DataSource = _assetData;
         }
-      
+
         //the switch will bind data to appropreate asset list. I for imported devices, B for Fiscal Book, 
         //F for found devices, M for missing devices.
         public dataViewForm(FileConnections a, char type)
         {
             InitializeComponent();
-            files=a;          
+            var files = a;
             switch (type)
             {
                 case 'I':
-                    assetData.DataSource = files.imported_devices;
+                    _assetData.DataSource = files.imported_devices;
                     break;
                 case 'B':
-                    assetData.DataSource = files.fb_assets;
+                    _assetData.DataSource = files.fb_assets;
                     break;
                 case 'F':
-                    assetData.DataSource = files.found_devices;
+                    _assetData.DataSource = files.found_devices;
                     break;
                 case 'M':
-                    assetData.DataSource = files.missing_devices;
+                    _assetData.DataSource = files.missing_devices;
                     break;
                 case 'L':
-                    assetData.DataSource = files.locationValidate_devices;
+                    _assetData.DataSource = files.locationValidate_devices;
                     break;
                 case 'S':
-                    assetData.DataSource = files.serialValidate_devices;
+                    _assetData.DataSource = files.serialValidate_devices;
                     break;
                 case 'R':
-                    assetData.DataSource = files.roomValidate_devices;
+                    _assetData.DataSource = files.roomValidate_devices;
                     break;
             }
 
 
-            this.assetDataView.DataSource = assetData;
+            assetDataView.DataSource = _assetData;
         }
 
         private void assetDataView_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-
         }
 
-        public void refresh(BindingList<asset> assetData)
+        public void Refresh(BindingList<asset> assetData)
         {
-            this.assetDataView.DataSource = null;
-            this.assetDataView.Update();
-            this.assetDataView.Refresh();
-            this.assetData.DataSource = assetData;
-            this.assetDataView.DataSource = assetData;
+            assetDataView.DataSource = null;
+            assetDataView.Update();
+            assetDataView.Refresh();
+            _assetData.DataSource = assetData;
+            assetDataView.DataSource = assetData;
         }
     }
 }
