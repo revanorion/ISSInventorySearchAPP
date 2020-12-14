@@ -1,15 +1,9 @@
-﻿using ISSISA_Library;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+﻿using System;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using ISSIAS_Library;
 
-namespace ISSISA
+namespace ISSIAS
 {
     public partial class InventoryForm : Form
     {
@@ -173,18 +167,18 @@ namespace ISSISA
                     MessageBox.Show("Don't have open the files selected! \n" + ex.Message);
                 }
             }
-            else if (_files.fiscal_book_address.Contains("Inventory Review"))
-            {
-                try
-                {
-                    _files.import_review_data();
-                    finishedFilesBinding.ResetBindings(false);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Don't have open the files selected! \n" + ex.Message);
-                }
-            }
+            // else if (_files.fiscal_book_address.Contains("Inventory Review"))
+            // {
+            //     try
+            //     {
+            //         _files.import_review_data();
+            //         finishedFilesBinding.ResetBindings(false);
+            //     }
+            //     catch (Exception ex)
+            //     {
+            //         MessageBox.Show("Don't have open the files selected! \n" + ex.Message);
+            //     }
+            // }
             else if (_files.files.Count < 1)
             {
                 MessageBox.Show("Files must be added to run!");
@@ -212,26 +206,22 @@ namespace ISSISA
             Cursor.Current = Cursors.WaitCursor;
             _sfd.Filter = "Excel Files (.xlsx)|*.xlsx|All Files (*.*)|*.*";
             _sfd.FilterIndex = 1;
-            if (_files.fiscal_book_address.Contains("Inventory Review"))
-            {
-                Cursor.Current = Cursors.WaitCursor;
-                _sfd.Filter = "Excel Files (.xlsx)|*.xlsx|All Files (*.*)|*.*";
-                _sfd.FilterIndex = 1;
-                //This save Process is for found devices
-                _sfd.FileName = _files.finished_files[0].name;
-                if (_sfd.ShowDialog() == DialogResult.OK)
-                {
-                    try
-                    {
-                        _files.write_validate_to_excel(_sfd.FileName);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message);
-                    }
-                }
-            }
-            else if (_files.found_devices != null)
+
+
+            _sfd.FileName = _files.finished_files[0].name;
+            // if (_sfd.ShowDialog() == DialogResult.OK)
+            // {
+            //     try
+            //     {
+            //         _files.write_validate_to_excel(_sfd.FileName);
+            //     }
+            //     catch (Exception ex)
+            //     {
+            //         MessageBox.Show(ex.Message);
+            //     }
+            // }
+
+            if (_files.found_devices != null)
             {
                 //This save Process is for found devices
                 _sfd.FileName = _files.finished_files[0].name;

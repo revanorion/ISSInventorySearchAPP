@@ -1,4 +1,4 @@
-﻿namespace ISSISA
+﻿namespace ISSIAS
 {
     partial class InventoryForm
     {
