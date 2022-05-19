@@ -81,7 +81,6 @@
     <Compile Include="assetEqualityComparer.cs" />
     <Compile Include="Entities\FATSAsset.cs" />
     <Compile Include="Excel\ExcelService.cs" />
-    <Compile Include="FATSContext.cs" />
     <Compile Include="FileConnections.cs" />
     <Compile Include="FiscalBook\FiscalBookService.cs" />
     <Compile Include="InventoryReview\InventoryReviewService.cs" />

@@ -174,9 +174,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="ISS_logo3.png" />
   </ItemGroup>
   <ItemGroup>

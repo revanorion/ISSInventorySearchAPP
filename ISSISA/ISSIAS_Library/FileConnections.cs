@@ -17,8 +17,7 @@ namespace ISSIAS_Library
 {
     public class FileConnections
     {
-        //This is the dbContext using Entity Framework to grab data
-        private readonly FATSContext _db;
+    
 
         //these lists contain the file properties that are being imported or exported
         public List<fileNaming> files = new List<fileNaming>();
@@ -1092,23 +1091,6 @@ namespace ISSIAS_Library
             finished_files.Add(new fileNaming(date + " Missing Inventory Report "));
             finished_files.Add(new fileNaming(date + " Missing Asset Report "));
         }
-
-
-        /// <summary>
-        /// work on getting functionality for fats working
-        /// </summary>
-        private void compareFats()
-        {
-            var wrongFatsData = new List<asset>();
-            foreach (var fbAsset in fb_assets.AsParallel().Where(x => x.iss_division == "NETWORK"))
-            {
-                if (_db.FatsAsset.Any(x => x.AssetNumber == fbAsset.asset_number
-                                           && (x.LocationCode != fbAsset.location
-                                               || x.Room != fbAsset.room_per_fats)))
-                    wrongFatsData.Add(fbAsset);
-            }
-        }
-
 
         //this function makes the necessay calls to import the data only from the inventory review file
         //calling functions: run button on form ->run_button_Click
